@@ -27,47 +27,42 @@ class Blackjack:
 
     def start(self):
 
-        while self.game_end:
-            self.game_restart()
-            # self.banker = [Card(symbol='K', suit='spade'),
-            #                Card(symbol='A', suit='heart')]
-            self.players.in_[0].hands[0].cards = [Card(symbol='A', suit='spade'),
-                                                  Card(symbol='A', suit='heart')]
+        # while self.game_end:
+        self.game_reset()
+        # self.banker = [Card(symbol='K', suit='spade'),
+        #                Card(symbol='A', suit='heart')]
+        # self.players.in_[0].hands[0].cards = [Card(symbol='A', suit='spade'),
+        #                                       Card(symbol='A', suit='heart')]
 
-            print("*" * 20)
-            print("New Round Begin")
-            print("*" * 20)
-            self.print_banker()
-            self.players.print_all_status()
-            print()
-
-            self.is_insurance()
-            self.check_blackjack()
-            self.players.leave_game()
-            self.leave_and_money()
-            self.players.print_all_result()
-
-            self.choice()
-            self.players.leave_game()
-            self.leave_and_money()
-
-            self.banker_time()
-            if not self.check_bust(self.banker):
-                self.compare_cards()
-                self.players.leave_game()
-                self.leave_and_money()
-
-            self.print_banker()
-            self.players.print_all_status(choice="out")
-            print()
-            self.players.print_all_result()
-            print(self.check_sum_switch_ace(self.players.out[0].hands[0].cards))
-            print("*" * 20)
-            if input("Continue?") == "n":
-                self.game_end = False
+        self.print_banker()
+        self.players.print_all_status()
+        self.is_insurance()
+        # self.check_blackjack()
+        # self.players.leave_game()
+        # self.leave_and_money()
+        # self.players.print_all_result()
+        #
+        # self.choice()
+        # self.players.leave_game()
+        # self.leave_and_money()
+        #
+        # self.banker_time()
+        # if not self.check_bust(self.banker):
+        #     self.compare_cards()
+        #     self.players.leave_game()
+        #     self.leave_and_money()
+        #
+        # self.print_banker()
+        # self.players.print_all_status(choice="out")
+        # print()
+        # self.players.print_all_result()
+        # print(self.check_sum_switch_ace(self.players.out[0].hands[0].cards))
+        # print("*" * 20)
+        # if input("Continue?") == "n":
+        #     self.game_end = False
 
     # Game Setting
-    def game_restart(self):
+    def game_reset(self):
 
         if self.deck.check_deck_num():
             self.deck.reset_deck()

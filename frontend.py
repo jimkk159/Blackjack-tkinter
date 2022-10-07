@@ -1,3 +1,4 @@
+from time import sleep
 from tkinter import *
 from game import Blackjack
 
@@ -11,11 +12,10 @@ game = Blackjack()
 
 def game_start_clicked():
     hint_label.config(text="Game Start")
-
+    game.start()
 
 def game_quit_clicked():
     hint_label.config(text="Game Quit")
-
 
 def hit_button_clicked():
     hint_label.config(text="Hit")
