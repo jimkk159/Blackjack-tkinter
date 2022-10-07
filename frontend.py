@@ -16,15 +16,57 @@ window.config(padx=20, pady=20, bg="black")
 
 game = Blackjack()
 
+state = 0
+
+
+def toggle(canvas, item, color_a, color_b):
+    if canvas.itemcget(item, "fill") == color_a:
+        canvas.itemconfig(item, fill=color_b)
+    else:
+        canvas.itemconfig(item, fill=color_a)
+
+
+def blink(canvas, item, delay_time):
+    toggle(canvas, item, "black", "white")
+    window.after(delay_time, blink, canvas, item, delay_time)
+
+
+def switch_choice(pre_state, state):
+    canvas = table_canvas
+    toggle(canvas, state_to_item(pre_state), "black", "white")
+    toggle(canvas, state_to_item(state), "black", "white")
+
+
+def state_to_item(state):
+    if state == 0:
+        return start
+    elif state == 1:
+        return setting
+    else:
+        return quit_
+
 
 def upKey(event):
+    global state
+    pre_state = state
+    if state > 0:
+        state -= 1
+    switch_choice(pre_state, state)
     print("Up key pressed")
 
+
 def downKey(event):
+    global state
+    pre_state = state
+    if state < 2:
+        state += 1
+    switch_choice(pre_state, state)
     print("Down key pressed")
+
 
 def leftKey(event):
     print("Left key pressed")
+
 
 def rightKey(event):
     print("Right key pressed")
@@ -101,14 +143,14 @@ table_canvas = Canvas(window, bg="black", width=WINDOW_WIDTH, height=WINDOW_HEIG
 table_canvas.create_image(400, 200, image=table_pic)
 
 game_title = table_canvas.create_text(400, 100, text="Blackjack", font=("Arial", 50, "bold"), fill="white")
-start = table_canvas.create_text(400, 200, text="Start", font=Lower_label_Font)
+start = table_canvas.create_text(400, 200, text="Start", font=Lower_label_Font, fill="white")
 setting = table_canvas.create_text(400, 250, text="Setting", font=Lower_label_Font)
 quit_ = table_canvas.create_text(400, 300, text="Quit", font=Lower_label_Font)
 table_canvas.grid(column=1, row=1)
 
+blink(table_canvas, game_title, 1000)
+
 window.bind('<Up>', upKey)
 window.bind('<Down>', downKey)
-window.bind('<Left>', leftKey)
-window.bind('<Right>', rightKey)
 
 window.mainloop()
