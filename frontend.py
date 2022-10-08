@@ -2,45 +2,54 @@ from time import sleep
 from tkinter import *
 from game import Blackjack
 from PIL import Image, ImageTk
+import pyglet
 
 WINDOW_WIDTH = 800
 WINDOW_HEIGHT = 400
 
-Upper_label_Font = ("Arial", 40, "italic")
+PIXEL_FONT = pyglet.font.add_file('./font/Pixels.ttf')
+
+Upper_label_Font = ("Pixels", 120, "bold")
 Lower_label_Font = ("Arial", 24, "bold")
+
+PADDING = 20
 
 window = Tk()
 window.title("Jim's Blackjack Game")
 window.minsize(width=WINDOW_WIDTH, height=WINDOW_HEIGHT)
-window.config(padx=20, pady=20, bg="black")
+window.config(padx=PADDING, pady=PADDING, bg="black")
 
 game = Blackjack()
 
 state = 0
 
 
-def toggle(canvas, item, color_a, color_b):
+def toggle_color(canvas, item, color_a, color_b):
     if canvas.itemcget(item, "fill") == color_a:
         canvas.itemconfig(item, fill=color_b)
     else:
         canvas.itemconfig(item, fill=color_a)
 
 
+def change_icon_loc(canvas, item, state_, x, y):
+    canvas.moveto(item, x, y + 50 * (state_ - 1))
+
 def blink(canvas, item, delay_time):
-    toggle(canvas, item, "black", "white")
+    toggle_color(canvas, item, "black", "white")
     window.after(delay_time, blink, canvas, item, delay_time)
 
 
-def switch_choice(pre_state, state):
+def switch_choice(pre_state, state_):
     canvas = table_canvas
-    toggle(canvas, state_to_item(pre_state), "black", "white")
-    toggle(canvas, state_to_item(state), "black", "white")
+    toggle_color(canvas, state_to_item(pre_state), "black", "white")
+    toggle_color(canvas, state_to_item(state_), "black", "white")
+    change_icon_loc(canvas, choice_icon, state_, 300+PADDING, 250-PADDING)
 
 
-def state_to_item(state):
-    if state == 0:
+def state_to_item(state_):
+    if state_ == 0:
         return start
-    elif state == 1:
+    elif state_ == 1:
         return setting
     else:
         return quit_
@@ -142,10 +151,14 @@ table_pic = ImageTk.PhotoImage(table_img)
 table_canvas = Canvas(window, bg="black", width=WINDOW_WIDTH, height=WINDOW_HEIGHT, highlightthickness=0)
 table_canvas.create_image(400, 200, image=table_pic)
 
-game_title = table_canvas.create_text(400, 100, text="Blackjack", font=("Arial", 50, "bold"), fill="white")
-start = table_canvas.create_text(400, 200, text="Start", font=Lower_label_Font, fill="white")
-setting = table_canvas.create_text(400, 250, text="Setting", font=Lower_label_Font)
-quit_ = table_canvas.create_text(400, 300, text="Quit", font=Lower_label_Font)
+game_title = table_canvas.create_text(400, 100, text="Blackjack ", font=Upper_label_Font, fill="white")
+title_icon = table_canvas.create_text(590, 115, text="♠", font=("Pixels", 80, "bold"))
+
+start = table_canvas.create_text(350, 200, text="Start", font=Lower_label_Font, fill="white", anchor=W)
+setting = table_canvas.create_text(350, 250, text="Setting", font=Lower_label_Font, anchor=W)
+quit_ = table_canvas.create_text(350, 300, text="Quit", font=Lower_label_Font, anchor=W)
+
+choice_icon = table_canvas.create_text(330, 200, text="♦", font=Lower_label_Font, fill="red")
 table_canvas.grid(column=1, row=1)
 
 blink(table_canvas, game_title, 1000)
