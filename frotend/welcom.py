@@ -1,9 +1,14 @@
 import pyglet
 from tkinter import *
-from setting import Setting
 from PIL import Image, ImageTk
 
+# self module
+from public import *
+from setting import Setting
+
 PIXEL_FONT = pyglet.font.add_file('../font/Pixels.ttf')
+
+WHITE = "#DBDBDB"
 
 TITLE_FONT = ("Pixels", 120, "bold")
 CHOICE_FONT = ("Arial", 24, "bold")
@@ -30,13 +35,13 @@ class Welcome:
 
         # Title
         self.game_title = self.table_canvas.create_text(400, 100, text="Blackjack ", font=TITLE_FONT,
-                                                        fill="white")
+                                                        fill=WHITE)
         self.title_icon = self.table_canvas.create_text(590, 115, text="♠", font=("Pixels", 80, "bold"))
 
         # Choice
         # Why has the 1px border
         self.choice_icon = self.table_canvas.create_text(329, 198, text="♦", font=CHOICE_FONT, fill="red")
-        self.start = self.table_canvas.create_text(350, 200, text="Start", font=CHOICE_FONT, fill="white",
+        self.start = self.table_canvas.create_text(350, 200, text="Start", font=CHOICE_FONT, fill=WHITE,
                                                    anchor=W)
         self.setting = self.table_canvas.create_text(350, 250, text="Setting", font=CHOICE_FONT, anchor=W)
         self.quit_ = self.table_canvas.create_text(350, 300, text="Quit", font=CHOICE_FONT, anchor=W)
@@ -48,24 +53,14 @@ class Welcome:
         self.table_canvas.grid(column=1, row=1)
         self.control_welcome()
 
-    def toggle_color(self, canvas, item, color_a, color_b):
-        if canvas.itemcget(item, "fill") == color_a:
-            canvas.itemconfig(item, fill=color_b)
-        else:
-            canvas.itemconfig(item, fill=color_a)
-
     def change_icon_loc(self, canvas, item, state_, x, y):
         canvas.moveto(item, x, y + 50 * (state_ - 1))
-
-    def blink(self, canvas, item, delay_time):
-        self.toggle_color(canvas, item, "black", "white")
-        self.window.after(delay_time, self.blink, canvas, item, delay_time)
 
     def switch_choice(self, state_):
         canvas = self.table_canvas
         for i in range(len(self.state_dict)):
             if i == state_:
-                canvas.itemconfig(self.state_to_item(i), fill="white")
+                canvas.itemconfig(self.state_to_item(i), fill=WHITE)
             else:
                 canvas.itemconfig(self.state_to_item(i), fill="black")
         self.change_icon_loc(canvas, self.choice_icon, state_, 300 + self.padding, 250 - self.padding)
@@ -84,6 +79,7 @@ class Welcome:
 
     def setting_choice(self):
         self.table_canvas.delete("all")
+        stop_blink(self.window)
         setting = Setting(self.window, self.table_canvas, self.window_width, self.window_height, self.padding)
 
     def quit_choice(self):
@@ -127,13 +123,10 @@ class Welcome:
     def mouseClick(self, event):
 
         if 450 > event.x > 300 and 225 >= event.y > 175:
-            print("start")
             self.start_choice()
         elif 500 > event.x > 300 and 275 >= event.y > 225:
-            print("setting")
             self.setting_choice()
         elif 450 > event.x > 300 and 325 >= event.y > 275:
-            print("quit")
             self.quit_choice()
 
         print("Mouse Click position:", event.x, event.y)
@@ -166,10 +159,9 @@ class Welcome:
 
     # Control Table
     def control_welcome(self):
-        self.blink(self.table_canvas, self.game_title, 1000)
-
+        start_blink(self.window, self.table_canvas, self.game_title, 1000)
         self.window.bind('<Up>', self.upKey)
         self.window.bind('<Down>', self.downKey)
         self.window.bind('<Return>', self.enterKey)
-        self.window.bind('<Button-1>', self.mouseClick)
-        self.window.bind('<Motion>', self.mouseMotion)
+        # self.window.bind('<Button-1>', self.mouseClick)
+        # self.window.bind('<Motion>', self.mouseMotion)

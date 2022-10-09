@@ -1,6 +1,9 @@
 from tkinter import *
+
+# self module
 from welcom import Welcome
 from game import Blackjack
+from setting import Setting
 
 WINDOW_WIDTH = 800
 WINDOW_HEIGHT = 400
@@ -24,6 +27,7 @@ class Frontend:
         self.canvas = Canvas(self.window, bg="black", width=WINDOW_WIDTH, height=WINDOW_HEIGHT,
                              highlightthickness=0)
         welcome = Welcome(self.window, self.canvas, WINDOW_WIDTH, WINDOW_HEIGHT, PADDING)
+        # setting = Setting(self.window, self.canvas, WINDOW_WIDTH, WINDOW_HEIGHT, PADDING)
         self.window.mainloop()
 
 frontend = Frontend()
