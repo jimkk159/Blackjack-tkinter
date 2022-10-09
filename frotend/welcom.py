@@ -1,7 +1,7 @@
 import pyglet
 from tkinter import *
+from setting import Setting
 from PIL import Image, ImageTk
-
 
 PIXEL_FONT = pyglet.font.add_file('../font/Pixels.ttf')
 
@@ -9,10 +9,12 @@ TITLE_FONT = ("Pixels", 120, "bold")
 CHOICE_FONT = ("Arial", 24, "bold")
 COPY_RIGHT_FONT = ("Arial", 12, "italic")
 
+
 class Welcome:
 
     def __init__(self, window, canvas, window_width, window_height, padding):
 
+        self.state_dict = {"start": 0, "setting": 1, "quit": 2}
         self.welcome_state = 0
         self.window = window
         self.window_width = window_width
@@ -32,17 +34,19 @@ class Welcome:
         self.title_icon = self.table_canvas.create_text(590, 115, text="♠", font=("Pixels", 80, "bold"))
 
         # Choice
-        self.choice_icon = self.table_canvas.create_text(330, 200, text="♦", font=CHOICE_FONT, fill="red")
+        # Why has the 1px border
+        self.choice_icon = self.table_canvas.create_text(329, 198, text="♦", font=CHOICE_FONT, fill="red")
         self.start = self.table_canvas.create_text(350, 200, text="Start", font=CHOICE_FONT, fill="white",
                                                    anchor=W)
         self.setting = self.table_canvas.create_text(350, 250, text="Setting", font=CHOICE_FONT, anchor=W)
         self.quit_ = self.table_canvas.create_text(350, 300, text="Quit", font=CHOICE_FONT, anchor=W)
 
         # Copy Right
-        self.copy_right = self.table_canvas.create_text(770-self.padding, 400-self.padding, text="©Jim 2022 ", font=COPY_RIGHT_FONT)
+        self.copy_right = self.table_canvas.create_text(770 - self.padding, 400 - self.padding, text="©Jim 2022 ",
+                                                        font=COPY_RIGHT_FONT)
 
         self.table_canvas.grid(column=1, row=1)
-        self.welcome_interface()
+        self.control_welcome()
 
     def toggle_color(self, canvas, item, color_a, color_b):
         if canvas.itemcget(item, "fill") == color_a:
@@ -57,10 +61,13 @@ class Welcome:
         self.toggle_color(canvas, item, "black", "white")
         self.window.after(delay_time, self.blink, canvas, item, delay_time)
 
-    def switch_choice(self, pre_state, state_):
+    def switch_choice(self, state_):
         canvas = self.table_canvas
-        self.toggle_color(canvas, self.state_to_item(pre_state), "black", "white")
-        self.toggle_color(canvas, self.state_to_item(state_), "black", "white")
+        for i in range(len(self.state_dict)):
+            if i == state_:
+                canvas.itemconfig(self.state_to_item(i), fill="white")
+            else:
+                canvas.itemconfig(self.state_to_item(i), fill="black")
         self.change_icon_loc(canvas, self.choice_icon, state_, 300 + self.padding, 250 - self.padding)
 
     def state_to_item(self, state_):
@@ -71,20 +78,29 @@ class Welcome:
         else:
             return self.quit_
 
-    def upKey(self, event):
+    # Choice
+    def start_choice(self):
+        pass
 
-        pre_state = self.welcome_state
+    def setting_choice(self):
+        self.table_canvas.delete("all")
+        setting = Setting(self.window, self.table_canvas, self.window_width, self.window_height, self.padding)
+
+    def quit_choice(self):
+        self.window.destroy()
+
+    # Keyboard
+    def upKey(self, event):
         if self.welcome_state > 0:
             self.welcome_state -= 1
-        self.switch_choice(pre_state, self.welcome_state)
+        self.switch_choice(self.welcome_state)
         print("Up key pressed")
 
     def downKey(self, event):
 
-        pre_state = self.welcome_state
         if self.welcome_state < 2:
             self.welcome_state += 1
-        self.switch_choice(pre_state, self.welcome_state)
+        self.switch_choice(self.welcome_state)
         print("Down key pressed")
 
     def leftKey(self, event):
@@ -96,18 +112,64 @@ class Welcome:
     def enterKey(self, event):
 
         if self.welcome_state == 0:
-            pass
+            print("start")
+            self.start_choice()
         elif self.welcome_state == 1:
+            print("setting")
             self.table_canvas.delete("all")
+            self.setting_choice()
         else:
-            self.window.destroy()
+            print("quit")
+            self.quit_choice()
         print("Enter key pressed")
 
-    # Show Table
-    def welcome_interface(self):
+    # Mouse
+    def mouseClick(self, event):
 
+        if 450 > event.x > 300 and 225 >= event.y > 175:
+            print("start")
+            self.start_choice()
+        elif 500 > event.x > 300 and 275 >= event.y > 225:
+            print("setting")
+            self.setting_choice()
+        elif 450 > event.x > 300 and 325 >= event.y > 275:
+            print("quit")
+            self.quit_choice()
+
+        print("Mouse Click position:", event.x, event.y)
+
+    def mouseMotion(self, event):
+
+        print("Motion", event.x, event.y)
+        if 450 > event.x > 300 and 225 >= event.y > 175:
+            self.switch_choice(self.state_dict["start"])
+            self.change_icon_loc(self.table_canvas,
+                                 self.choice_icon,
+                                 self.state_dict["start"],
+                                 300 + self.padding,
+                                 250 - self.padding)
+        elif 500 > event.x > 300 and 275 >= event.y > 225:
+            self.switch_choice(self.state_dict["setting"])
+            self.change_icon_loc(self.table_canvas,
+                                 self.choice_icon,
+                                 self.state_dict["setting"],
+                                 300 + self.padding,
+                                 250 - self.padding)
+        elif 450 > event.x > 300 and 325 >= event.y > 275:
+            self.switch_choice(self.state_dict["quit"])
+            self.change_icon_loc(self.table_canvas,
+                                 self.choice_icon,
+                                 self.state_dict["quit"],
+                                 300 + self.padding,
+                                 250 - self.padding)
+        print("Mouse Move position", event.x, event.y)
+
+    # Control Table
+    def control_welcome(self):
         self.blink(self.table_canvas, self.game_title, 1000)
 
         self.window.bind('<Up>', self.upKey)
         self.window.bind('<Down>', self.downKey)
         self.window.bind('<Return>', self.enterKey)
+        self.window.bind('<Button-1>', self.mouseClick)
+        self.window.bind('<Motion>', self.mouseMotion)
