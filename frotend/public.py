@@ -31,7 +31,6 @@ def toggle_color_bg(canvas, item, color_a, color_b):
 def start_blink(window, canvas, item, delay_time_bg, delay_time_fg, with_bg=False):
     global blink_id
     blink_id = None
-
     blink(window, canvas, item, delay_time_bg, delay_time_fg, with_bg)
 
 
@@ -50,4 +49,3 @@ def blink(window, canvas, item, delay_time_bg, delay_time_fg, with_bg):
         toggle_color_bg(canvas, item, WHITE, "black")
     blink_id = window.after(delay_time_fg, blink, window, canvas, item, delay_time_fg, delay_time_bg, with_bg)
     # print(blink_id)
-

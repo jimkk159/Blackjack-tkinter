@@ -2,7 +2,6 @@ from tkinter import *
 
 # self module
 import welcome
-import game
 from public import *
 
 WHITE = "#DBDBDB"
@@ -188,7 +187,7 @@ class Setting:
                 self.setting_canvas.itemconfig(self.is_double_down_item, text="Open")
             elif self.choice_state == [1, 0]:
                 if self.blackjack_ratio > 1:
-                    self.blackjack_ratio = round(self.blackjack_ratio-0.1, 1)
+                    self.blackjack_ratio = round(self.blackjack_ratio - 0.1, 1)
                 self.setting_canvas.itemconfig(self.blackjack_ratio_item, text=self.blackjack_ratio)
         print("Up key pressed")
 
@@ -225,7 +224,7 @@ class Setting:
                 self.setting_canvas.itemconfig(self.is_double_down_item, text="Close")
             elif self.choice_state == [1, 0]:
                 if self.blackjack_ratio < 1.5:
-                    self.blackjack_ratio = round(self.blackjack_ratio+0.1, 1)
+                    self.blackjack_ratio = round(self.blackjack_ratio + 0.1, 1)
                 self.setting_canvas.itemconfig(self.blackjack_ratio_item, text=self.blackjack_ratio)
         print("Down key pressed")
 
