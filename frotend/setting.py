@@ -206,7 +206,7 @@ class Setting:
                     self.deck_num += 1
                 self.setting_canvas.itemconfig(self.deck_num_item, text=self.deck_num)
             elif self.choice_state == [0, 1]:
-                if self.player_num < 4:
+                if self.player_num < 3:
                     self.player_num += 1
                 self.setting_canvas.itemconfig(self.player_num_item, text=self.player_num)
             elif self.choice_state == [0, 2]:

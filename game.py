@@ -40,11 +40,11 @@ class Blackjack:
         #                Card(symbol='A', suit='heart')]
         # self.players.in_[0].hands[0].cards = [Card(symbol='A', suit='spade'),
         #                                       Card(symbol='A', suit='heart')]
-
-        self.print_banker()
-        self.players.print_all_status()
-        if self.is_insurance:
-            self.ask_insurance()
+        self.deal_to_all()
+        # self.print_banker()
+        # self.players.print_all_status()
+        # if self.is_insurance:
+        #     self.ask_insurance()
         # self.check_blackjack()
         # self.players.leave_game()
         # self.leave_and_money()
@@ -81,7 +81,6 @@ class Blackjack:
 
         # Reset Banker Cards
         self.banker = []
-        self.deal_to_all()
 
         # Nobody leave
         self.leave_man = 0
@@ -402,3 +401,12 @@ class Blackjack:
 
     def set_blackjack_ratio(self, blackjack_ratio):
         self.blackjack_ratio = blackjack_ratio
+
+    def get_banker_cards(self):
+        return self.banker
+
+    def get_player_cards(self):
+        return self.players.get_all_hands()
+
+    def get_player(self):
+        return self.players.get_all_players()

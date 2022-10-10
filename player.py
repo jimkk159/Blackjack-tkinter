@@ -47,6 +47,8 @@ class Player:
             print(" | ", end="")
         print()
 
+    def get_hands(self):
+        return self.hands
 
 class Players:
 
@@ -183,3 +185,15 @@ class Players:
 
         for player in self.out:
             player.print_result()
+
+    def get_all_hands(self):
+
+        array = self.in_
+        all_hands = []
+        for player in array:
+            all_hands.append(player.get_hands())
+        return all_hands
+
+    def get_all_players(self):
+
+        return self.in_

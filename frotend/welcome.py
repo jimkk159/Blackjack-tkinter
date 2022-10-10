@@ -4,6 +4,7 @@ from PIL import Image, ImageTk
 
 # self module
 from public import *
+import casino
 import setting
 
 PIXEL_FONT = pyglet.font.add_file('../font/Pixels.ttf')
@@ -79,11 +80,15 @@ class Welcome:
 
     # Choice
     def start_choice(self):
-        pass
+        stop_blink(self.window)
+        self.table_canvas.delete("all")
+        casino_ = casino.Casino(self.game, self.window, self.table_canvas, self.window_width, self.window_height,
+                               self.padding)
 
     def setting_choice(self):
-        self.table_canvas.delete("all")
+        # Table Image
         stop_blink(self.window)
+        self.table_canvas.delete("all")
         setting_ = setting.Setting(self.game, self.window, self.table_canvas, self.window_width, self.window_height,
                                    self.padding)
 
