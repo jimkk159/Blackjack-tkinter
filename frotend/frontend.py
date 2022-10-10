@@ -1,7 +1,7 @@
 from tkinter import *
 
 # self module
-from welcom import Welcome
+from welcome import Welcome
 from game import Blackjack
 from setting import Setting
 

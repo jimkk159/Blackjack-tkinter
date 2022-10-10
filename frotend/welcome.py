@@ -4,7 +4,7 @@ from PIL import Image, ImageTk
 
 # self module
 from public import *
-from setting import Setting
+import setting
 
 PIXEL_FONT = pyglet.font.add_file('../font/Pixels.ttf')
 
@@ -80,7 +80,7 @@ class Welcome:
     def setting_choice(self):
         self.table_canvas.delete("all")
         stop_blink(self.window)
-        setting = Setting(self.window, self.table_canvas, self.window_width, self.window_height, self.padding)
+        setting_ = setting.Setting(self.window, self.table_canvas, self.window_width, self.window_height, self.padding)
 
     def quit_choice(self):
         self.window.destroy()
@@ -112,7 +112,6 @@ class Welcome:
             self.start_choice()
         elif self.welcome_state == 1:
             print("setting")
-            self.table_canvas.delete("all")
             self.setting_choice()
         else:
             print("quit")
@@ -159,7 +158,7 @@ class Welcome:
 
     # Control Table
     def control_welcome(self):
-        start_blink(self.window, self.table_canvas, self.game_title, 1000)
+        start_blink(self.window, self.table_canvas, self.game_title, 1000, 1000)
         self.window.bind('<Up>', self.upKey)
         self.window.bind('<Down>', self.downKey)
         self.window.bind('<Return>', self.enterKey)
