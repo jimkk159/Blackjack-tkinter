@@ -24,7 +24,16 @@ class Setting:
         # Game instance
         self.game = game
 
-        # Attribute
+        # Game Attribute
+        self.deck_num = self.game.get_deck_num()
+        self.player_num = self.game.get_player_num()
+        self.min_bet = self.game.get_min_bet()
+        self.is_insurance = self.game.get_is_insurance()
+        self.is_over_ten = self.game.get_insurance_over_10()
+        self.is_double = self.game.get_is_double()
+        self.blackjack_ratio = self.game.get_blackjack_ratio()
+
+        # Interface Attribute
         self.setting_state_dict = {"choice": 0, "modify": 1}
         self.setting_state = 0
         self.choice_state_dict = {"deck": [0, 0], "player": [0, 1], "bet": [0, 2], "insurance": [0, 3],
@@ -40,50 +49,51 @@ class Setting:
 
         # Setting Argument
         self.setting_argument = Frame(self.window, background="red", highlightthickness=5)
-        self.deck = self.setting_canvas.create_text(LEFT_ANCHOR, UP_ANCHOR, text="Deck Number:", font=CHOICE_FONT,
-                                                    anchor=W, fill=WHITE)
-        self.deck_num = self.setting_canvas.create_text(LEFT_ANCHOR + 225, UP_ANCHOR,
-                                                        text=f"{self.game.get_deck_num()}",
-                                                        font=CHOICE_FONT,
-                                                        anchor=W, fill=WHITE)
-        self.player = self.setting_canvas.create_text(LEFT_ANCHOR, UP_ANCHOR + VERTICAL_SPACE,
-                                                      text="Player Number:", font=CHOICE_FONT, anchor=W, fill=WHITE)
-        self.player_num = self.setting_canvas.create_text(LEFT_ANCHOR + 245, UP_ANCHOR + VERTICAL_SPACE,
-                                                          text=f"{self.game.get_player_num()}", font=CHOICE_FONT,
-                                                          anchor=W, fill=WHITE)
-        self.bet = self.setting_canvas.create_text(LEFT_ANCHOR, UP_ANCHOR + 2 * VERTICAL_SPACE,
-                                                   text="Minium Bet:", font=CHOICE_FONT, anchor=W,
-                                                   fill=WHITE)
-        self.bet_num = self.setting_canvas.create_text(LEFT_ANCHOR + 190, UP_ANCHOR + 2 * VERTICAL_SPACE,
-                                                       text=f"{self.game.get_min_bet()}", font=CHOICE_FONT, anchor=W,
-                                                       fill=WHITE)
-        self.insurance = self.setting_canvas.create_text(LEFT_ANCHOR, UP_ANCHOR + 3 * VERTICAL_SPACE,
-                                                         text="Insurance:", font=CHOICE_FONT, anchor=W, fill=WHITE)
-        self.is_insurance = self.setting_canvas.create_text(LEFT_ANCHOR + 165, UP_ANCHOR + 3 * VERTICAL_SPACE,
-                                                            text="Open" if self.game.get_is_insurance() else "Close",
-                                                            font=CHOICE_FONT, anchor=W,
-                                                            fill=WHITE)
-        self.over_ten = self.setting_canvas.create_text(LEFT_ANCHOR, UP_ANCHOR + 4 * VERTICAL_SPACE,
-                                                        text="Over 10 Insurance:", font=CHOICE_FONT,
-                                                        anchor=W, fill=WHITE)
-        self.is_over_ten = self.setting_canvas.create_text(LEFT_ANCHOR + 290, UP_ANCHOR + 4 * VERTICAL_SPACE,
-                                                           text="Open" if self.game.get_insurance_over_10() else "Close",
-                                                           font=CHOICE_FONT,
-                                                           anchor=W, fill=WHITE)
-        self.double_down = self.setting_canvas.create_text(LEFT_ANCHOR, UP_ANCHOR + 5 * VERTICAL_SPACE,
-                                                           text="Double Down:", font=CHOICE_FONT,
-                                                           anchor=W, fill=WHITE)
-        self.is_double_down = self.setting_canvas.create_text(LEFT_ANCHOR + 220, UP_ANCHOR + 5 * VERTICAL_SPACE,
-                                                              text="Open" if self.game.get_is_double() else "Close",
-                                                              font=CHOICE_FONT,
-                                                              anchor=W, fill=WHITE)
-        self.blackjack = self.setting_canvas.create_text(LEFT_ANCHOR + HORIZONTAL_SPACE, UP_ANCHOR,
-                                                         text="BlackJack ration:", font=CHOICE_FONT,
+        self.deck_item = self.setting_canvas.create_text(LEFT_ANCHOR, UP_ANCHOR, text="Deck Number:", font=CHOICE_FONT,
                                                          anchor=W, fill=WHITE)
-        self.blackjack_ratio = self.setting_canvas.create_text(LEFT_ANCHOR + HORIZONTAL_SPACE + 275, UP_ANCHOR,
-                                                               text=f"{self.game.get_blackjack_ratio()}",
-                                                               font=CHOICE_FONT,
+        self.deck_num_item = self.setting_canvas.create_text(LEFT_ANCHOR + 225, UP_ANCHOR,
+                                                             text=f"{self.deck_num}",
+                                                             font=CHOICE_FONT,
+                                                             anchor=W, fill=WHITE)
+        self.player_item = self.setting_canvas.create_text(LEFT_ANCHOR, UP_ANCHOR + VERTICAL_SPACE,
+                                                           text="Player Number:", font=CHOICE_FONT, anchor=W,
+                                                           fill=WHITE)
+        self.player_num_item = self.setting_canvas.create_text(LEFT_ANCHOR + 245, UP_ANCHOR + VERTICAL_SPACE,
+                                                               text=f"{self.player_num}", font=CHOICE_FONT,
                                                                anchor=W, fill=WHITE)
+        self.bet_item = self.setting_canvas.create_text(LEFT_ANCHOR, UP_ANCHOR + 2 * VERTICAL_SPACE,
+                                                        text="Minium Bet:", font=CHOICE_FONT, anchor=W,
+                                                        fill=WHITE)
+        self.bet_num_item = self.setting_canvas.create_text(LEFT_ANCHOR + 190, UP_ANCHOR + 2 * VERTICAL_SPACE,
+                                                            text=f"{self.min_bet}", font=CHOICE_FONT, anchor=W,
+                                                            fill=WHITE)
+        self.insurance_item = self.setting_canvas.create_text(LEFT_ANCHOR, UP_ANCHOR + 3 * VERTICAL_SPACE,
+                                                              text="Insurance:", font=CHOICE_FONT, anchor=W, fill=WHITE)
+        self.is_insurance_item = self.setting_canvas.create_text(LEFT_ANCHOR + 165, UP_ANCHOR + 3 * VERTICAL_SPACE,
+                                                                 text="Open" if self.is_insurance else "Close",
+                                                                 font=CHOICE_FONT, anchor=W,
+                                                                 fill=WHITE)
+        self.over_ten_item = self.setting_canvas.create_text(LEFT_ANCHOR, UP_ANCHOR + 4 * VERTICAL_SPACE,
+                                                             text="Over 10 Insurance:", font=CHOICE_FONT,
+                                                             anchor=W, fill=WHITE)
+        self.is_over_ten_item = self.setting_canvas.create_text(LEFT_ANCHOR + 290, UP_ANCHOR + 4 * VERTICAL_SPACE,
+                                                                text="Open" if self.is_over_ten else "Close",
+                                                                font=CHOICE_FONT,
+                                                                anchor=W, fill=WHITE)
+        self.double_down_item = self.setting_canvas.create_text(LEFT_ANCHOR, UP_ANCHOR + 5 * VERTICAL_SPACE,
+                                                                text="Double Down:", font=CHOICE_FONT,
+                                                                anchor=W, fill=WHITE)
+        self.is_double_down_item = self.setting_canvas.create_text(LEFT_ANCHOR + 220, UP_ANCHOR + 5 * VERTICAL_SPACE,
+                                                                   text="Open" if self.is_double else "Close",
+                                                                   font=CHOICE_FONT,
+                                                                   anchor=W, fill=WHITE)
+        self.blackjack_item = self.setting_canvas.create_text(LEFT_ANCHOR + HORIZONTAL_SPACE, UP_ANCHOR,
+                                                              text="BlackJack ration:", font=CHOICE_FONT,
+                                                              anchor=W, fill=WHITE)
+        self.blackjack_ratio_item = self.setting_canvas.create_text(LEFT_ANCHOR + HORIZONTAL_SPACE + 275, UP_ANCHOR,
+                                                                    text=f"{self.blackjack_ratio}",
+                                                                    font=CHOICE_FONT,
+                                                                    anchor=W, fill=WHITE)
         self.leave = self.setting_canvas.create_text(650, 360, text="Leave", font=QUIT_FONT,
                                                      anchor=W, fill=WHITE)
 
@@ -154,6 +164,32 @@ class Setting:
                 y -= 1
             self.choice_state = [x, y]
             self.switch_choice(self.choice_state)
+        else:
+            if self.choice_state == [0, 0]:
+                if self.deck_num > 2:
+                    self.deck_num -= 1
+                self.setting_canvas.itemconfig(self.deck_num_item, text=self.deck_num)
+            elif self.choice_state == [0, 1]:
+                if self.player_num > 1:
+                    self.player_num -= 1
+                self.setting_canvas.itemconfig(self.player_num_item, text=self.player_num)
+            elif self.choice_state == [0, 2]:
+                if self.min_bet > 1:
+                    self.min_bet -= 1
+                self.setting_canvas.itemconfig(self.bet_num_item, text=self.min_bet)
+            elif self.choice_state == [0, 3]:
+                self.is_insurance = True
+                self.setting_canvas.itemconfig(self.is_insurance_item, text="Open")
+            elif self.choice_state == [0, 4]:
+                self.is_over_ten = True
+                self.setting_canvas.itemconfig(self.is_over_ten_item, text="Open")
+            elif self.choice_state == [0, 5]:
+                self.is_double = True
+                self.setting_canvas.itemconfig(self.is_double_down_item, text="Open")
+            elif self.choice_state == [1, 0]:
+                if self.blackjack_ratio > 1:
+                    self.blackjack_ratio = round(self.blackjack_ratio-0.1, 1)
+                self.setting_canvas.itemconfig(self.blackjack_ratio_item, text=self.blackjack_ratio)
         print("Up key pressed")
 
     def downKey(self, event):
@@ -165,6 +201,32 @@ class Setting:
                 y += 1
             self.choice_state = [x, y]
             self.switch_choice(self.choice_state)
+        else:
+            if self.choice_state == [0, 0]:
+                if self.deck_num < 8:
+                    self.deck_num += 1
+                self.setting_canvas.itemconfig(self.deck_num_item, text=self.deck_num)
+            elif self.choice_state == [0, 1]:
+                if self.player_num < 4:
+                    self.player_num += 1
+                self.setting_canvas.itemconfig(self.player_num_item, text=self.player_num)
+            elif self.choice_state == [0, 2]:
+                if self.min_bet < 200:
+                    self.min_bet += 1
+                self.setting_canvas.itemconfig(self.bet_num_item, text=self.min_bet)
+            elif self.choice_state == [0, 3]:
+                self.is_insurance = False
+                self.setting_canvas.itemconfig(self.is_insurance_item, text="Close")
+            elif self.choice_state == [0, 4]:
+                self.is_over_ten = False
+                self.setting_canvas.itemconfig(self.is_over_ten_item, text="Close")
+            elif self.choice_state == [0, 5]:
+                self.is_double = False
+                self.setting_canvas.itemconfig(self.is_double_down_item, text="Close")
+            elif self.choice_state == [1, 0]:
+                if self.blackjack_ratio < 1.5:
+                    self.blackjack_ratio = round(self.blackjack_ratio+0.1, 1)
+                self.setting_canvas.itemconfig(self.blackjack_ratio_item, text=self.blackjack_ratio)
         print("Down key pressed")
 
     def leftKey(self, event):
@@ -202,25 +264,25 @@ class Setting:
         if self.setting_state == self.setting_state_dict["choice"]:
             self.setting_state = self.setting_state_dict["modify"]
             if self.choice_state == [0, 0]:
-                start_blink(self.window, self.setting_canvas, self.deck_num, 1000, 750)
+                start_blink(self.window, self.setting_canvas, self.deck_num_item, 1000, 750)
                 print("deck")
             elif self.choice_state == [0, 1]:
-                start_blink(self.window, self.setting_canvas, self.player_num, 1000, 750)
+                start_blink(self.window, self.setting_canvas, self.player_num_item, 1000, 750)
                 print("player")
             elif self.choice_state == [0, 2]:
-                start_blink(self.window, self.setting_canvas, self.bet_num, 1000, 750)
+                start_blink(self.window, self.setting_canvas, self.bet_num_item, 1000, 750)
                 print("bet")
             elif self.choice_state == [0, 3]:
-                start_blink(self.window, self.setting_canvas, self.is_insurance, 1000, 750)
+                start_blink(self.window, self.setting_canvas, self.is_insurance_item, 1000, 750)
                 print("insurance")
             elif self.choice_state == [0, 4]:
-                start_blink(self.window, self.setting_canvas, self.is_over_ten, 1000, 750)
+                start_blink(self.window, self.setting_canvas, self.is_over_ten_item, 1000, 750)
                 print("over_ten")
             elif self.choice_state == [0, 5]:
-                start_blink(self.window, self.setting_canvas, self.is_double_down, 1000, 750)
+                start_blink(self.window, self.setting_canvas, self.is_double_down_item, 1000, 750)
                 print("double_down")
             elif self.choice_state == [1, 0]:
-                start_blink(self.window, self.setting_canvas, self.blackjack_ratio, 1000, 750)
+                start_blink(self.window, self.setting_canvas, self.blackjack_ratio_item, 1000, 750)
                 print("blackjack")
             else:
                 self.leave_choice()
@@ -230,19 +292,27 @@ class Setting:
             stop_blink(self.window)
             item = None
             if self.choice_state == [0, 0]:
-                item = self.deck_num
+                self.game.set_deck_num(self.deck_num)
+                item = self.deck_num_item
             elif self.choice_state == [0, 1]:
-                item = self.player_num
+                self.game.set_player_num(self.player_num)
+                item = self.player_num_item
             elif self.choice_state == [0, 2]:
-                item = self.bet_num
+                self.game.set_deck_num(self.min_bet)
+                item = self.bet_num_item
             elif self.choice_state == [0, 3]:
-                item = self.is_insurance
+                self.game.set_deck_num(self.is_insurance)
+                item = self.is_insurance_item
             elif self.choice_state == [0, 4]:
-                item = self.is_over_ten
+                self.game.set_deck_num(self.is_over_ten)
+                item = self.is_over_ten_item
             elif self.choice_state == [0, 5]:
-                item = self.is_double_down
+                self.game.set_is_double(self.is_double)
+                item = self.is_double_down_item
             elif self.choice_state == [1, 0]:
-                item = self.blackjack_ratio
+                self.game.set_blackjack_ratio(self.blackjack_ratio)
+                item = self.blackjack_ratio_item
+
             self.setting_canvas.itemconfig(item, fill=WHITE)
         print("Enter key pressed")
 

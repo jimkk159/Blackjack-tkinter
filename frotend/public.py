@@ -1,6 +1,7 @@
 WHITE = "#DBDBDB"
 blink_id = None
 
+
 def toggle_color_fg(canvas, item, color_a, color_b):
     if type(item) == int:
         if canvas.itemcget(item, "fill") == color_a:
@@ -49,3 +50,4 @@ def blink(window, canvas, item, delay_time_bg, delay_time_fg, with_bg):
         toggle_color_bg(canvas, item, WHITE, "black")
     blink_id = window.after(delay_time_fg, blink, window, canvas, item, delay_time_fg, delay_time_bg, with_bg)
     # print(blink_id)
+

@@ -119,7 +119,7 @@ class Blackjack:
                     choice = input("Want to buy an insurance?")
                     if choice == "y":
                         player.money -= floor(player.stake / 2)
-                        player.insurance = True
+                        player.insurance_item = True
 
     # Check Sum
     def check_sum(self, cards_in_hand):
@@ -314,7 +314,7 @@ class Blackjack:
         if player.fold:
             player.money += floor(player.stake / 2)
 
-        if self.check_sum_switch_ace(self.banker) == 21 and player.insurance:
+        if self.check_sum_switch_ace(self.banker) == 21 and player.insurance_item:
             player.money += 2 * floor(player.stake / 2)
 
     def give_hand_money(self, hand, player):
@@ -381,3 +381,24 @@ class Blackjack:
 
     def get_blackjack_ratio(self):
         return self.blackjack_ratio
+
+    def set_deck_num(self, deck_num):
+        self.deck_num = deck_num
+
+    def set_player_num(self, player_num):
+        self.player_num = player_num
+
+    def set_min_bet(self, min_bet):
+        self.min_bet = min_bet
+
+    def set_is_insurance(self, is_insurance):
+        self.is_insurance = is_insurance
+
+    def set_insurance_over_10(self, is_insurance_over_10):
+        self.is_insurance_over_10 = is_insurance_over_10
+
+    def set_is_double(self, is_double):
+        self.is_double = is_double
+
+    def set_blackjack_ratio(self, blackjack_ratio):
+        self.blackjack_ratio = blackjack_ratio
