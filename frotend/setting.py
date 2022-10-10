@@ -7,6 +7,7 @@ import welcome
 WHITE = "#DBDBDB"
 CHOICE_FONT = ("Arial", 24, "bold")
 QUIT_FONT = ("Arial", 30, "italic")
+ARROW_FONT = ("Arial", 40, "bold")
 
 LEFT_ANCHOR = 50
 HORIZONTAL_SPACE = 400
@@ -73,6 +74,33 @@ class Setting:
                                                                anchor=W, fill=WHITE)
         self.leave = self.setting_canvas.create_text(650, 360, text="Leave", font=QUIT_FONT,
                                                      anchor=W, fill=WHITE)
+
+        # Instruction️
+        self.instruction_return = self.setting_canvas.create_text(740, 280,
+                                                                 text="↩",
+                                                                 font=("Arial", 50, "bold"),
+                                                                 fill=WHITE)
+        self.instruction = self.setting_canvas.create_text(740, 240,
+                                                                 text="Confirm: ",
+                                                                 font=("Arial", 16, "italic"),
+                                                                 fill=WHITE)
+
+        self.arrow_up = self.setting_canvas.create_text(600, 180,
+                                                        text="↑",
+                                                        font=ARROW_FONT,
+                                                        fill=WHITE)
+        self.arrow_down = self.setting_canvas.create_text(600, 260,
+                                                          text="↓",
+                                                          font=ARROW_FONT,
+                                                          fill=WHITE)
+        self.arrow_left = self.setting_canvas.create_text(560, 220,
+                                                          text="←",
+                                                          font=ARROW_FONT,
+                                                          fill=WHITE)
+        self.arrow_right = self.setting_canvas.create_text(640, 220,
+                                                           text="→",
+                                                           font=ARROW_FONT,
+                                                           fill=WHITE)
         # Choice
         self.choice_icon = self.setting_canvas.create_text(LEFT_ANCHOR - self.padding, UP_ANCHOR, text="♥",
                                                            font=CHOICE_FONT,
@@ -100,7 +128,8 @@ class Setting:
     def leave_choice(self):
         self.setting_canvas.delete("all")
         stop_blink(self.window)
-        welcome_ = welcome.Welcome(self.window, self.setting_canvas, self.window_width, self.window_height, self.padding)
+        welcome_ = welcome.Welcome(self.window, self.setting_canvas, self.window_width, self.window_height,
+                                   self.padding)
 
     def quit_choice(self):
         self.window.destroy()
