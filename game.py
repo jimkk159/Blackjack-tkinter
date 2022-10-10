@@ -1,3 +1,4 @@
+import card
 from math import floor
 from player import Hand, Players
 from card import Card, Deck
@@ -8,6 +9,12 @@ class Blackjack:
     def __init__(self):
 
         self.game_end = True
+
+        # Setting Rule
+        self.is_insurance = True
+        self.is_insurance_over_10 = False
+        self.is_double = True
+        self.blackjack_ratio = 1.5
 
         # Setting Deck
         self.deck_num = 4
@@ -36,7 +43,8 @@ class Blackjack:
 
         self.print_banker()
         self.players.print_all_status()
-        self.is_insurance()
+        if self.is_insurance:
+            self.ask_insurance()
         # self.check_blackjack()
         # self.players.leave_game()
         # self.leave_and_money()
@@ -101,9 +109,11 @@ class Blackjack:
         self.deal(self.banker)
 
     # Game Start
-    def is_insurance(self):
+    def ask_insurance(self):
 
-        if self.banker[1].symbol == "A":
+        if self.banker[1].symbol == "A" or (
+                self.is_insurance_over_10 and self.banker[1].symbol in card.poker_symbol[:5]):
+
             for player in self.players.in_:
                 if player.money >= floor(player.stake / 2):
                     choice = input("Want to buy an insurance?")
@@ -185,7 +195,8 @@ class Blackjack:
 
             print()
             choice = input(f"Player {player.id} choice?")
-            if choice == "double" and len(player.hands[0].cards) == 2 and player.money >= player.stake:
+            if choice == "double" and len(
+                    player.hands[0].cards) == 2 and player.money >= player.stake and self.is_double:
 
                 self.double_down(player)
                 if self.check_bust(player.hands[0].cards):
@@ -209,7 +220,6 @@ class Blackjack:
                                 and len(player.hands[hand_count].cards) == 2 \
                                 and player.hands[hand_count].cards[0].symbol == player.hands[hand_count].cards[1].symbol \
                                 and player.money >= player.stake:
-
                             player.money -= player.stake
                             split_hand = Hand()
                             split_hand.cards.append(player.hands[hand_count].cards.pop())
@@ -321,13 +331,13 @@ class Blackjack:
         if hand.result == "blackjack":
 
             if player.double:
-                player.money += 5 * player.stake
+                player.money += 2 * (1 + self.blackjack_ratio) * player.stake
 
             elif hand._5_card_charlie:
-                player.money += floor(5.5 * player.stake)
+                player.money += floor((1 + 3 * self.blackjack_ratio) * player.stake)
 
             else:
-                player.money += floor(2.5 * player.stake)
+                player.money += floor((1 + self.blackjack_ratio) * player.stake)
 
         if hand.result == "push":
             if player.double:
@@ -350,3 +360,24 @@ class Blackjack:
             print(f"{card.symbol} {card.suit} ", end="")
         print(f"{self.check_sum_switch_ace(self.banker)} ")
         print()
+
+    def get_deck_num(self):
+        return self.deck_num
+
+    def get_player_num(self):
+        return self.player_num
+
+    def get_min_bet(self):
+        return self.min_bet
+
+    def get_is_insurance(self):
+        return self.is_insurance
+
+    def get_insurance_over_10(self):
+        return self.is_insurance_over_10
+
+    def get_is_double(self):
+        return self.is_double
+
+    def get_blackjack_ratio(self):
+        return self.blackjack_ratio

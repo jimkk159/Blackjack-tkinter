@@ -22,11 +22,11 @@ class Frontend:
         # Game Icon
         self.window.iconbitmap("../icon/poker-cards.ico")
 
-        # game = Blackjack()
+        game = Blackjack()
 
         self.canvas = Canvas(self.window, bg="black", width=WINDOW_WIDTH, height=WINDOW_HEIGHT,
                              highlightthickness=0)
-        welcome = Welcome(self.window, self.canvas, WINDOW_WIDTH, WINDOW_HEIGHT, PADDING)
+        welcome = Welcome(game, self.window, self.canvas, WINDOW_WIDTH, WINDOW_HEIGHT, PADDING)
         # setting = Setting(self.window, self.canvas, WINDOW_WIDTH, WINDOW_HEIGHT, PADDING)
         self.window.mainloop()
 

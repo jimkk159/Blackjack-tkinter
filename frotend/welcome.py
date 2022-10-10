@@ -17,8 +17,12 @@ COPY_RIGHT_FONT = ("Arial", 12, "italic")
 
 class Welcome:
 
-    def __init__(self, window, canvas, window_width, window_height, padding):
+    def __init__(self, game, window, canvas, window_width, window_height, padding):
 
+        # Game instance
+        self.game = game
+
+        # Attribute
         self.state_dict = {"start": 0, "setting": 1, "quit": 2}
         self.welcome_state = 0
         self.window = window
@@ -80,7 +84,8 @@ class Welcome:
     def setting_choice(self):
         self.table_canvas.delete("all")
         stop_blink(self.window)
-        setting_ = setting.Setting(self.window, self.table_canvas, self.window_width, self.window_height, self.padding)
+        setting_ = setting.Setting(self.game, self.window, self.table_canvas, self.window_width, self.window_height,
+                                   self.padding)
 
     def quit_choice(self):
         self.window.destroy()

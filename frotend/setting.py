@@ -1,8 +1,9 @@
 from tkinter import *
 
 # self module
-from public import *
 import welcome
+import game
+from public import *
 
 WHITE = "#DBDBDB"
 CHOICE_FONT = ("Arial", 24, "bold")
@@ -18,8 +19,12 @@ VERTICAL_SPACE = 60
 
 class Setting:
 
-    def __init__(self, window, canvas, window_width, window_height, padding):
+    def __init__(self, game, window, canvas, window_width, window_height, padding):
 
+        # Game instance
+        self.game = game
+
+        # Attribute
         self.setting_state_dict = {"choice": 0, "modify": 1}
         self.setting_state = 0
         self.choice_state_dict = {"deck": [0, 0], "player": [0, 1], "bet": [0, 2], "insurance": [0, 3],
@@ -37,53 +42,60 @@ class Setting:
         self.setting_argument = Frame(self.window, background="red", highlightthickness=5)
         self.deck = self.setting_canvas.create_text(LEFT_ANCHOR, UP_ANCHOR, text="Deck Number:", font=CHOICE_FONT,
                                                     anchor=W, fill=WHITE)
-        self.deck_num = self.setting_canvas.create_text(LEFT_ANCHOR + 225, UP_ANCHOR, text="4", font=CHOICE_FONT,
+        self.deck_num = self.setting_canvas.create_text(LEFT_ANCHOR + 225, UP_ANCHOR,
+                                                        text=f"{self.game.get_deck_num()}",
+                                                        font=CHOICE_FONT,
                                                         anchor=W, fill=WHITE)
         self.player = self.setting_canvas.create_text(LEFT_ANCHOR, UP_ANCHOR + VERTICAL_SPACE,
                                                       text="Player Number:", font=CHOICE_FONT, anchor=W, fill=WHITE)
         self.player_num = self.setting_canvas.create_text(LEFT_ANCHOR + 245, UP_ANCHOR + VERTICAL_SPACE,
-                                                          text="2", font=CHOICE_FONT, anchor=W, fill=WHITE)
+                                                          text=f"{self.game.get_player_num()}", font=CHOICE_FONT,
+                                                          anchor=W, fill=WHITE)
         self.bet = self.setting_canvas.create_text(LEFT_ANCHOR, UP_ANCHOR + 2 * VERTICAL_SPACE,
                                                    text="Minium Bet:", font=CHOICE_FONT, anchor=W,
                                                    fill=WHITE)
         self.bet_num = self.setting_canvas.create_text(LEFT_ANCHOR + 190, UP_ANCHOR + 2 * VERTICAL_SPACE,
-                                                       text="8", font=CHOICE_FONT, anchor=W,
+                                                       text=f"{self.game.get_min_bet()}", font=CHOICE_FONT, anchor=W,
                                                        fill=WHITE)
         self.insurance = self.setting_canvas.create_text(LEFT_ANCHOR, UP_ANCHOR + 3 * VERTICAL_SPACE,
                                                          text="Insurance:", font=CHOICE_FONT, anchor=W, fill=WHITE)
         self.is_insurance = self.setting_canvas.create_text(LEFT_ANCHOR + 165, UP_ANCHOR + 3 * VERTICAL_SPACE,
-                                                            text="Close", font=CHOICE_FONT, anchor=W,
+                                                            text="Open" if self.game.get_is_insurance() else "Close",
+                                                            font=CHOICE_FONT, anchor=W,
                                                             fill=WHITE)
         self.over_ten = self.setting_canvas.create_text(LEFT_ANCHOR, UP_ANCHOR + 4 * VERTICAL_SPACE,
                                                         text="Over 10 Insurance:", font=CHOICE_FONT,
                                                         anchor=W, fill=WHITE)
         self.is_over_ten = self.setting_canvas.create_text(LEFT_ANCHOR + 290, UP_ANCHOR + 4 * VERTICAL_SPACE,
-                                                           text="Close", font=CHOICE_FONT,
+                                                           text="Open" if self.game.get_insurance_over_10() else "Close",
+                                                           font=CHOICE_FONT,
                                                            anchor=W, fill=WHITE)
         self.double_down = self.setting_canvas.create_text(LEFT_ANCHOR, UP_ANCHOR + 5 * VERTICAL_SPACE,
                                                            text="Double Down:", font=CHOICE_FONT,
                                                            anchor=W, fill=WHITE)
         self.is_double_down = self.setting_canvas.create_text(LEFT_ANCHOR + 220, UP_ANCHOR + 5 * VERTICAL_SPACE,
-                                                              text="Close", font=CHOICE_FONT,
+                                                              text="Open" if self.game.get_is_double() else "Close",
+                                                              font=CHOICE_FONT,
                                                               anchor=W, fill=WHITE)
         self.blackjack = self.setting_canvas.create_text(LEFT_ANCHOR + HORIZONTAL_SPACE, UP_ANCHOR,
                                                          text="BlackJack ration:", font=CHOICE_FONT,
                                                          anchor=W, fill=WHITE)
         self.blackjack_ratio = self.setting_canvas.create_text(LEFT_ANCHOR + HORIZONTAL_SPACE + 275, UP_ANCHOR,
-                                                               text="1.2", font=CHOICE_FONT,
+                                                               text=f"{self.game.get_blackjack_ratio()}",
+                                                               font=CHOICE_FONT,
                                                                anchor=W, fill=WHITE)
         self.leave = self.setting_canvas.create_text(650, 360, text="Leave", font=QUIT_FONT,
                                                      anchor=W, fill=WHITE)
 
         # Instruction️
         self.instruction_return = self.setting_canvas.create_text(740, 280,
-                                                                 text="↩",
-                                                                 font=("Arial", 50, "bold"),
-                                                                 fill=WHITE)
+                                                                  text="↩",
+                                                                  font=("Arial", 50, "bold"),
+                                                                  fill=WHITE)
         self.instruction = self.setting_canvas.create_text(740, 240,
-                                                                 text="Confirm: ",
-                                                                 font=("Arial", 16, "italic"),
-                                                                 fill=WHITE)
+                                                           text="Confirm: ",
+                                                           font=("Arial", 16, "italic"),
+                                                           fill=WHITE)
 
         self.arrow_up = self.setting_canvas.create_text(600, 180,
                                                         text="↑",
@@ -128,7 +140,7 @@ class Setting:
     def leave_choice(self):
         self.setting_canvas.delete("all")
         stop_blink(self.window)
-        welcome_ = welcome.Welcome(self.window, self.setting_canvas, self.window_width, self.window_height,
+        welcome_ = welcome.Welcome(self.game, self.window, self.setting_canvas, self.window_width, self.window_height,
                                    self.padding)
 
     def quit_choice(self):
