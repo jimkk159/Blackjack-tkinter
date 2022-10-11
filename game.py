@@ -8,7 +8,7 @@ class Blackjack:
 
     def __init__(self):
 
-        self.game_end = True
+        self.game_end = False
 
         # Setting Rule
         self.is_insurance = True
@@ -34,17 +34,12 @@ class Blackjack:
 
     def start(self):
 
-        # while self.game_end:
-        # self.game_reset()
         # self.banker = [Card(symbol='K', suit='spade'),
         #                Card(symbol='A', suit='heart')]
         # self.players.in_[0].hands[0].cards = [Card(symbol='A', suit='spade'),
         #                                       Card(symbol='A', suit='heart')]
-        self.deal_to_all()
-        # self.print_banker()
-        # self.players.print_all_status()
-        # if self.is_insurance:
-        #     self.ask_insurance()
+        if self.is_insurance:
+            self.ask_insurance()
         # self.check_blackjack()
         # self.players.leave_game()
         # self.leave_and_money()
@@ -53,7 +48,7 @@ class Blackjack:
         # self.choice()
         # self.players.leave_game()
         # self.leave_and_money()
-        #
+
         # self.banker_time()
         # if not self.check_bust(self.banker):
         #     self.compare_cards()
@@ -76,8 +71,6 @@ class Blackjack:
             self.deck.reset_deck()
 
         # Reset Player
-        # self.player_num = int(input("How many players want to participate?"))
-        self.players = Players(self.player_num)
         self.players.reset_all(self.min_bet)
 
         # Reset Banker Cards
@@ -85,6 +78,9 @@ class Blackjack:
 
         # Nobody leave
         self.leave_man = 0
+
+    def reset_player(self):
+        self.players = Players(self.player_num)
 
     # Deal Card
     def deal(self, cards_in_hand: list, faced=True):
@@ -109,17 +105,20 @@ class Blackjack:
         self.deal(self.banker)
 
     # Game Start
-    def ask_insurance(self):
+    def ask_insurance(self, choices):
 
         if self.banker[1].symbol == "A" or (
                 self.is_insurance_over_10 and self.banker[1].symbol in card.poker_symbol[:5]):
 
-            for player in self.players.in_:
-                if player.money >= floor(player.stake / 2):
-                    choice = input("Want to buy an insurance?")
-                    if choice == "y":
-                        player.money -= floor(player.stake / 2)
-                        player.insurance_item = True
+            for num in range(self.player_num):
+                self.ask_player_insurance(self.players[num], choices[num])
+
+    def ask_player_insurance(self, player, choice):
+
+        if player.money >= floor(player.stake / 2):
+            if choice:
+                player.money -= floor(player.stake / 2)
+                player.insurance = True
 
     # Check Sum
     def check_sum(self, cards_in_hand):
@@ -314,7 +313,7 @@ class Blackjack:
         if player.fold:
             player.money += floor(player.stake / 2)
 
-        if self.check_sum_switch_ace(self.banker) == 21 and player.insurance_item:
+        if self.check_sum_switch_ace(self.banker) == 21 and player.insurance:
             player.money += 2 * floor(player.stake / 2)
 
     def give_hand_money(self, hand, player):
