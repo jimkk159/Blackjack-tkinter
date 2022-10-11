@@ -23,7 +23,7 @@ class Blackjack:
 
         # Setting Player
         self.player_num = 2
-        self.players = Players(self.player_num)
+        self.players = None
 
         # Setting Banker
         self.banker = []
@@ -35,7 +35,7 @@ class Blackjack:
     def start(self):
 
         # while self.game_end:
-        self.game_reset()
+        # self.game_reset()
         # self.banker = [Card(symbol='K', suit='spade'),
         #                Card(symbol='A', suit='heart')]
         # self.players.in_[0].hands[0].cards = [Card(symbol='A', suit='spade'),
@@ -70,13 +70,14 @@ class Blackjack:
         #     self.game_end = False
 
     # Game Setting
-    def game_reset(self):
+    def reset(self):
 
         if self.deck.check_deck_num():
             self.deck.reset_deck()
 
         # Reset Player
         # self.player_num = int(input("How many players want to participate?"))
+        self.players = Players(self.player_num)
         self.players.reset_all(self.min_bet)
 
         # Reset Banker Cards
