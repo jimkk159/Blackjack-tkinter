@@ -43,6 +43,7 @@ class Casino:
         self.window_height = window_height
         self.padding = padding
         self.table_canvas = canvas
+        self.game_end_rect = None
 
         # Game Attribute
         self.img_suit_dict = {"heart": 0, "club": 1, "diamond": 2, "spade": 3}
@@ -118,7 +119,7 @@ class Casino:
                             Card(symbol='A', suit='heart')]
         self.game_state = "insurance"
         self.show_banker_card()
-        self.show_player_card()
+        self.show_players_card()
 
         if self.is_ask_insurance:
             self.ask_insurance()
@@ -130,12 +131,13 @@ class Casino:
             self.game.banker[0].faced = True
             self.show_banker_card()
         self.game.check_blackjack()
+        self.check_player_state()
         print(self.game.get_players()[0].money)
         print(self.game.get_players()[0].stake)
+        self.update_money(self.game.get_players()[0])
+        self.update_stake(self.game.get_players()[0])
         self.game.players.leave_game()
         self.game.leave_and_money()
-
-
 
     def ask_insurance(self):
 
@@ -154,8 +156,27 @@ class Casino:
             self.insurance_choice_no = Label(frame, text="No", fg="white", bg="black", font=CHOICE_FONT)
             self.insurance_choice_no.grid(column=0, row=2)
             self.insurance_area = self.table_canvas.create_window(x1 - 130, y1, window=frame, anchor="nw")
-            # insurance_area = self.table_canvas.create_rectangle(x1 - 130, y1, x2 - 130, y2, outline="black",
-            #                                                     width=3)
+
+    #
+    # Check Player State
+    def check_player_state(self):
+
+        hands = self.game.get_players()[0].hands
+        game_result = all([(True if hand.result != "" else False) for hand in hands])
+        if game_result:
+            self.show_game_end()
+
+    # Show Game End
+    def show_game_end(self):
+        self.game_state = "end"
+        self.game_end_rect = self.table_canvas.create_rectangle(200, 100, 600, 300, fill="black", outline="white",
+                                                                width=5)
+        self.game_end_question = self.table_canvas.create_text(300, 120, text=f"Game End", font=("Arial", 30, "bold"),
+                                                               anchor="nw", fill="White")
+        self.game_end_continue = self.table_canvas.create_text(350, 200, text=f"Continue", font=("Arial", 18, "bold"),
+                                                               anchor="nw", fill="White")
+        self.game_end_quit = self.table_canvas.create_text(350, 250, text=f"Quit", font=("Arial", 18, "bold"),
+                                                           anchor="nw", fill="White")
 
     # Show Card
     def show_card(self, x, y, card_loc, faced):
@@ -169,37 +190,64 @@ class Casino:
 
         # Delete the previous card img
         if not self.banker_img:
-            for img in self.banker_img:
-                self.table_canvas.delete(img)
+            self.delete_imgs(self.banker_img)
+            self.banker_img = []
 
         # Create card img
         cards = self.game.banker
         for card_num in range(len(cards)):
             card = cards[card_num]
             card_loc = 14 * self.img_suit_dict[card.suit] + self.img_symbol_dict[card.symbol]
-            self.banker_img.append(self.show_card(325 + 68 * card_num + CARD_HORIZONTAL_MODIFY, 30, card_loc, card.faced))
+            self.banker_img.append(
+                self.show_card(325 + 68 * card_num + CARD_HORIZONTAL_MODIFY, 30, card_loc, card.faced))
 
-    def show_player_card(self):
+    def show_players_card(self):
 
+        # Create card img
         for player_num in range(self.player_num):
-            hands = self.players[player_num].get_hands()
-            for hand_num in range(len(hands)):
-                hand = hands[hand_num]
-                cards = hand.cards
-                for card_num in range(len(cards)):
-                    card = cards[card_num]
-                    card_loc = 14 * self.img_suit_dict[card.suit] + self.img_symbol_dict[card.symbol]
-                    self.show_card(self.players_area_xy[player_num][0] + 68 * card_num + CARD_HORIZONTAL_MODIFY,
-                                   self.players_area_xy[player_num][1],
-                                   card_loc,
-                                   card.faced)
+            self.show_player_card(player_num,
+                                  self.players_area_xy[player_num][0],
+                                  self.players_area_xy[player_num][1])
+
+    def show_player_card(self, player_num, x, y):
+
+        # Delete the previous card img
+        if not self.players_img:
+            if len(self.players_img) > player_num:
+                for cards_img in self.players_img[player_num]:
+                    self.delete_imgs(cards_img)
+                self.players_img[player_num] = []
+
+        # Create a list to save specific player img
+        while len(self.players_img) <= player_num:
+            self.players_img.append([])
+
+        hands = self.players[player_num].get_hands()
+
+        # Player split card has multiple hands
+        for _ in range(len(hands)):
+            self.players_img[player_num].append([])
+
+        # Create card im
+        for hand_num in range(len(hands)):
+            hand = hands[hand_num]
+            cards = hand.cards
+            for card_num in range(len(cards)):
+                card = cards[card_num]
+                card_loc = 14 * self.img_suit_dict[card.suit] + self.img_symbol_dict[card.symbol]
+                card_img = self.show_card(x + 68 * card_num + CARD_HORIZONTAL_MODIFY, y, card_loc, card.faced)
+                self.players_img[player_num][hand_num].append(card_img)
+
+    def delete_imgs(self, imgs):
+        for img in imgs:
+            self.table_canvas.delete(img)
 
     # Update Money
     def update_money(self, player):
-        self.money.config(text=f"Money: {player.money}")
+        self.table_canvas.itemconfig(self.money, text=f"Money: {player.money}")
 
     def update_stake(self, player):
-        self.money.config(text=f"Money: {player.stake}")
+        self.table_canvas.itemconfig(self.stake, text=f"Stake: {player.stake}")
 
     # Control Table
     def control_casino(self):
