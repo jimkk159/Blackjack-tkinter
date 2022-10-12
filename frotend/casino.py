@@ -69,6 +69,7 @@ class Casino:
 
         self.player_choice_question = None
         self.player_choice_area = None
+        self.player_option_result = None
         self.player_choice_double = None
         self.player_choice_split = None
         self.player_choice_hit = None
@@ -122,7 +123,7 @@ class Casino:
             self.players_area_xy.append((580, 230, 680, 310))
         self.money = self.table_canvas.create_text(10, 10, text=f"Money: {self.game.get_players()[0].money}",
                                                    font=PLAYER_STATE_FONT, anchor="nw", fill="black")
-        self.stake = self.table_canvas.create_text(10, 50, text=f"Stake: {self.game.get_players()[0].stake}",
+        self.stake = self.table_canvas.create_text(10, 50, text=f"Stake: {self.game.get_players()[0].basic_stake}",
                                                    font=PLAYER_STATE_FONT, anchor="nw", fill="black")
         self.control_casino()
         self.game_start()
@@ -130,11 +131,12 @@ class Casino:
     def game_start(self):
 
         # Game start
-
         self.game.reset()
         self.game.deal_to_all()
-        self.game.banker = [Card(symbol='K', suit='spade', faced=False),
-                            Card(symbol='A', suit='heart')]
+        # self.game.banker = [Card(symbol='K', suit='spade', faced=False),
+        #                     Card(symbol='A', suit='heart')]
+        self.game.get_players()[0].hands[0].cards = [Card(symbol='A', suit='spade'),
+                                                     Card(symbol='A', suit='heart')]
         self.game_state = "insurance"
         self.show_banker_card()
         self.show_players_card()
@@ -152,7 +154,7 @@ class Casino:
             self.game.banker[0].faced = True
             self.show_banker_card()
         game_end = self.game.check_blackjack()
-        self.check_player_state()
+        self.check_player_end()
         if game_end:
             self.update_money(self.game.get_players()[0])
             self.update_stake(self.game.get_players()[0])
@@ -165,8 +167,7 @@ class Casino:
     # Ask Insurance
     def ask_insurance(self):
 
-        if self.game.banker[1].symbol == "A" or (
-                self.is_over_ten and self.game.banker[1].symbol in ["A", "K", "Q", "J", "10"]):
+        if self.game.get_judge_insurance():
             self.game_state = "insurance"
             self.game_choice = self.game_choice_dict["insurance"]["yes"]
             self.is_insurance = True
@@ -184,11 +185,17 @@ class Casino:
         self.game_choice = self.game_choice_dict["choice"]["double"]
         x1, y1, x2, y2 = self.players_area_xy[0]
         q_config = {"font": ("Arial", 14, "bold")}
+        player_option_dict = {"double": ["Double down", self.player_choice_double],
+                              "split": ["Split", self.player_choice_split],
+                              "hit": ["Hit", self.player_choice_hit],
+                              "stand": ["Stand", self.player_choice_stand]}
+        player_option = []
+        for option in self.game.get_player_option(self.game.get_players()[0], self.game.get_players()[0].hands[0]):
+            player_option.append(player_option_dict[option][0])
         result = self.show_question(x1 - 145, y1 - 15, question="Your Choice:", q_config=q_config,
-                                    options=["Double down", "Split", "Hit", "Stand"])
+                                    options=player_option)
         [frame, self.player_choice_area, self.player_choice_question,
-         [self.player_choice_double, self.player_choice_split, self.player_choice_hit,
-          self.player_choice_stand]] = result
+         self.player_option_result] = result
 
     # Show Question Area
     def show_question(self, x, y, question=None, q_config=None, options=None, o_config=None):
@@ -219,7 +226,7 @@ class Casino:
         return [frame, area, question, options_array]
 
     # Check Player State
-    def check_player_state(self):
+    def check_player_end(self):
 
         # TODO only check player 1 now
         hands = self.game.get_players()[0].hands
@@ -327,7 +334,7 @@ class Casino:
         self.table_canvas.itemconfig(self.money, text=f"Money: {player.money}")
 
     def update_stake(self, player):
-        self.table_canvas.itemconfig(self.stake, text=f"Stake: {player.stake}")
+        self.table_canvas.itemconfig(self.stake, text=f"Stake: {player.total_stake}")
 
     # Control Table
     def control_casino(self):
@@ -355,8 +362,7 @@ class Casino:
             choice_list = [self.insurance_choice_yes, self.insurance_choice_no]
             self.game_choice = self.switch_choice(self.game_choice, "up", choice_list)
         elif self.game_state == "choice":
-            choice_list = [self.player_choice_double, self.player_choice_split, self.player_choice_hit,
-                           self.player_choice_stand]
+            choice_list = self.player_option_result
             self.game_choice = self.switch_choice(self.game_choice, "up", choice_list)
         elif self.game_state == "game end":
             choice_list = [self.game_end_continue, self.game_end_quit]
@@ -369,8 +375,7 @@ class Casino:
             choice_list = [self.insurance_choice_yes, self.insurance_choice_no]
             self.game_choice = self.switch_choice(self.game_choice, "down", choice_list)
         elif self.game_state == "choice":
-            choice_list = [self.player_choice_double, self.player_choice_split, self.player_choice_hit,
-                           self.player_choice_stand]
+            choice_list = self.player_option_result
             self.game_choice = self.switch_choice(self.game_choice, "down", choice_list)
         elif self.game_state == "game end":
             choice_list = [self.game_end_continue, self.game_end_quit]
@@ -391,7 +396,11 @@ class Casino:
             self.check_blackjack()
         elif self.game_state == "choice":
             if self.game_choice == self.game_choice_dict["choice"]["double"]:
-                pass
+                self.game.double_down_process(self.game.get_players()[0])
+                self.update_money(self.game.get_players()[0])
+                self.update_stake(self.game.get_players()[0])
+                self.show_players_card()
+                self.check_player_end()
             elif self.game_choice == self.game_choice_dict["choice"]["split"]:
                 pass
             elif self.game_choice == self.game_choice_dict["choice"]["hit"]:

@@ -110,9 +110,9 @@ class Blackjack:
     def ask_player_insurance(self, player, choice):
 
         player.insurance = False
-        if player.money >= floor(player.stake / 2):
+        if player.money >= floor(player.basic_stake / 2):
             if choice:
-                player.money -= floor(player.stake / 2)
+                player.money -= floor(player.basic_stake / 2)
                 player.insurance = True
 
     # Check Sum
@@ -139,7 +139,7 @@ class Blackjack:
         return self.check_sum(cards_in_hand)
 
     # Check Bust
-    def check_bust(self, cards_in_hand):
+    def get_is_hand_bust(self, cards_in_hand):
 
         if self.check_sum_switch_ace(cards_in_hand) > 21:
             return True
@@ -172,9 +172,9 @@ class Blackjack:
 
         # TODO only thing about the player 1 game end situation
         if self.check_cards_blackjack(self.players.in_[0].hands[0].cards):
-            return True # Mean Game End
+            return True  # Mean Game End
         else:
-            return False # Mean Game Continue
+            return False  # Mean Game Continue
 
     # It's Player Round
     def choice(self):
@@ -200,13 +200,9 @@ class Blackjack:
 
             print()
             choice = input(f"Player {player.id} choice?")
-            if choice == "double" and len(
-                    player.hands[0].cards) == 2 and player.money >= player.stake and self.is_double:
+            if choice == "double" and self.get_player_can_double(player):
+                self.double_down_process(player)
 
-                self.double_down(player)
-                if self.check_bust(player.hands[0].cards):
-                    print("bust")
-                    player.hands[0].result = "lose"
             else:
 
                 hand_count = 0
@@ -221,11 +217,9 @@ class Blackjack:
 
                     while True:
 
-                        if choice == "split" \
-                                and len(player.hands[hand_count].cards) == 2 \
-                                and player.hands[hand_count].cards[0].symbol == player.hands[hand_count].cards[1].symbol \
-                                and player.money >= player.stake:
-                            player.money -= player.stake
+                        if choice == "split" and self.get_hand_can_split(player, player.hands[hand_count]):
+                            player.money -= player.basic_stake
+                            player.total_stake_stake += player.basic_stake
                             split_hand = Hand()
                             split_hand.cards.append(player.hands[hand_count].cards.pop())
 
@@ -246,8 +240,8 @@ class Blackjack:
 
                         print()
                         self.players.print_all_status()
-                        print("Bust?", hand_count, self.check_bust(player.hands[hand_count].cards))
-                        if self.check_bust(player.hands[hand_count].cards):
+                        print("Bust?", hand_count, self.get_is_hand_bust(player.hands[hand_count].cards))
+                        if self.get_is_hand_bust(player.hands[hand_count].cards):
                             print("This hand is bust")
                             choice = ""
                             player.hands[hand_count].result = "lose"
@@ -262,8 +256,14 @@ class Blackjack:
     def double_down(self, player):
 
         player.double = True
-        player.money -= player.stake
+        player.money -= player.basic_stake
+        player.total_stake = 2 * player.basic_stake
         self.deal(player.hands[0].cards)
+
+    def double_down_process(self, player):
+        self.double_down(player)
+        if self.get_is_hand_bust(player.hands[0].cards):
+            player.hands[0].result = "lose"
 
     def hit(self, hand):
 
@@ -280,7 +280,7 @@ class Blackjack:
 
     def banker_bust(self):
 
-        if self.check_bust(self.banker):
+        if self.get_is_hand_bust(self.banker):
             for player in self.players.in_:
                 for hand in player.hands:
                     if hand.result == "":
@@ -317,10 +317,10 @@ class Blackjack:
             self.give_hand_money(hand, player)
 
         if player.fold:
-            player.money += floor(player.stake / 2)
+            player.money += floor(player.basic_stake / 2)
 
         if self.check_sum_switch_ace(self.banker) == 21 and player.insurance:
-            player.money += 2 * floor(player.stake / 2)
+            player.money += 2 * floor(player.basic_stake / 2)
 
     def give_hand_money(self, hand, player):
 
@@ -328,27 +328,27 @@ class Blackjack:
 
             if hand._5_card_charlie or player.double:
 
-                player.money += 4 * player.stake
+                player.money += 4 * player.basic_stake
 
             else:
-                player.money += 2 * player.stake
+                player.money += 2 * player.basic_stake
 
         if hand.result == "blackjack":
 
             if player.double:
-                player.money += 2 * (1 + self.blackjack_ratio) * player.stake
+                player.money += 2 * (1 + self.blackjack_ratio) * player.basic_stake
 
             elif hand._5_card_charlie:
-                player.money += floor((1 + 3 * self.blackjack_ratio) * player.stake)
+                player.money += floor((1 + 3 * self.blackjack_ratio) * player.basic_stake)
 
             else:
-                player.money += floor((1 + self.blackjack_ratio) * player.stake)
+                player.money += floor((1 + self.blackjack_ratio) * player.basic_stake)
 
         if hand.result == "push":
             if player.double:
-                player.money += 2 * player.stake
+                player.money += 2 * player.basic_stake
             else:
-                player.money += player.stake
+                player.money += player.basic_stake
 
     def leave_and_money(self):
 
@@ -380,6 +380,22 @@ class Blackjack:
 
     def get_insurance_over_10(self):
         return self.is_insurance_over_10
+
+    def get_player_can_double(self, player):
+        if len(player.hands[0].cards) == 2 and player.money >= player.basic_stake and self.is_double:
+            return True
+        return False
+
+    def get_hand_can_split(self, player, hand):
+        if len(hand.cards) == 2 and hand.cards[0].symbol == hand.cards[1].symbol and player.money >= player.basic_stake:
+            return True
+        return False
+
+    def get_judge_insurance(self):
+        if self.banker[1].symbol == "A" or (
+                self.is_insurance_over_10 and self.banker[1].symbol in ["A", "K", "Q", "J", "10"]):
+            return True
+        return False
 
     def get_is_double(self):
         return self.is_double
@@ -416,3 +432,15 @@ class Blackjack:
 
     def get_players(self):
         return self.players.get_all_players()
+
+    def get_player_option(self, player, hand):
+        result = []
+        if self.get_player_can_double(player):
+            result.append("double")
+        if self.get_hand_can_split(player, hand):
+            result.append("split")
+        result += ["hit", "stand"]
+        return result
+
+    def get_player_stake(self, player):
+        return player.total_stake

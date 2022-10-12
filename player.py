@@ -12,7 +12,8 @@ class Player:
 
     def __init__(self, id_, money=100, init_stake=5):
         self.id = id_
-        self.stake = init_stake
+        self.basic_stake = init_stake
+        self.total_stake = init_stake
         self.money = money
         self.hands = []
         self.fold = False
@@ -39,7 +40,7 @@ class Player:
     def print_status(self):
         print(f"Player {self.id} has:")
         print(f"money: {self.money} ")
-        print(f"stake: {self.stake} ")
+        print(f"stake: {self.basic_stake} ")
         print(f"cards: ", end="")
         for hand in self.hands:
             for card in hand.cards:
@@ -92,11 +93,11 @@ class Players:
                 # player.stake = int(input("How much money do you want to bet?"))
 
                 # Check Player stake
-                if player.stake >= player.money:
-                    player.stake = player.money
+                if player.basic_stake >= player.money:
+                    player.basic_stake = player.money
                     print("All in")
 
-                if player.stake < min_bet:
+                if player.basic_stake < min_bet:
                     print(f"At least {min_bet} dollar")
                     continue
                 break
@@ -105,7 +106,7 @@ class Players:
     def pay_stake(self):
 
         for player in self.in_:
-            player.money -= player.stake
+            player.money -= player.basic_stake
 
     # Reset Double
     def reset_double(self):
