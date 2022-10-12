@@ -1,6 +1,7 @@
 from tkinter import *
 from PIL import Image, ImageTk
 
+import welcome
 from card import Card
 
 CHOICE_FONT = ("Arial", 10, "bold")
@@ -43,18 +44,25 @@ class Casino:
         self.window_height = window_height
         self.padding = padding
         self.table_canvas = canvas
-        self.game_end_rect = None
 
         # Game Attribute
         self.img_suit_dict = {"heart": 0, "club": 1, "diamond": 2, "spade": 3}
         self.img_symbol_dict = {"faced": 0, "2": 1, "3": 2, "4": 3, "5": 4, "6": 5, "7": 6, "8": 7, "9": 8, "10": 9,
                                 "J": 10, "Q": 11, "K": 12, "A": 13}
         self.game_state = "start"
+        self.game_choice = None
 
         self.is_insurance = None
-        self.insurance_choice_no = None
-        self.insurance_choice_yes = None
+
+        self.insurance_area = None
         self.insurance_question = None
+        self.insurance_choice_yes = None
+        self.insurance_choice_no = None
+
+        self.game_end_question = None
+        self.game_end_area = None
+        self.game_end_continue = None
+        self.game_end_quit = None
 
         self.banker_img = []
         self.players_img = []
@@ -147,36 +155,55 @@ class Casino:
             self.is_insurance = True
             # for num in range(self.player_num):
             x1, y1, x2, y2 = self.players_area_xy[0]
-            frame = Frame(self.window, height=100, width=100, bg="black")
-            frame.grid()
-            self.insurance_question = Label(frame, text="Buy insurance?", fg="white", bg="black", font=CHOICE_FONT)
-            self.insurance_question.grid(column=0, row=0)
-            self.insurance_choice_yes = Label(frame, text="Yes", fg="black", bg="white", font=CHOICE_FONT)
-            self.insurance_choice_yes.grid(column=0, row=1)
-            self.insurance_choice_no = Label(frame, text="No", fg="white", bg="black", font=CHOICE_FONT)
-            self.insurance_choice_no.grid(column=0, row=2)
-            self.insurance_area = self.table_canvas.create_window(x1 - 130, y1, window=frame, anchor="nw")
+            result = self.show_question(x1 - 130, y1, question="Buy insurance?", options=["Yes", "No"])
+            [frame, self.insurance_area, self.insurance_question,
+             [self.insurance_choice_yes, self.insurance_choice_no]] = result
 
-    #
+    # Show Question Area
+    def show_question(self, x, y, question=None, q_config=None, options=None, o_config=None):
+
+        frame = Frame(self.window, bg="black")
+        frame.grid()
+
+        row = 0
+        if question:
+            question = Label(frame, text=question, fg="white", bg="black", font=CHOICE_FONT)
+            if q_config:
+                question.config(q_config)
+            question.grid(column=0, row=row)
+            row += 1
+
+        options_array = []
+        for num in range(len(options)):
+            if num == 0:
+                option = Label(frame, text=options[num], fg="black", bg="white", font=CHOICE_FONT)
+            else:
+                option = Label(frame, text=options[num], fg="white", bg="black", font=CHOICE_FONT)
+            if o_config and o_config[num]:
+                option.config(o_config[num])
+            option.grid(column=0, row=row)
+            options_array.append(option)
+            row += 1
+        area = self.table_canvas.create_window(x, y, window=frame, anchor="nw")
+        return [frame, area, question, options_array]
+
     # Check Player State
     def check_player_state(self):
 
         hands = self.game.get_players()[0].hands
         game_result = all([(True if hand.result != "" else False) for hand in hands])
         if game_result:
+            self.game_state = "game end"
             self.show_game_end()
 
     # Show Game End
     def show_game_end(self):
-        self.game_state = "end"
-        self.game_end_rect = self.table_canvas.create_rectangle(200, 100, 600, 300, fill="black", outline="white",
-                                                                width=5)
-        self.game_end_question = self.table_canvas.create_text(300, 120, text=f"Game End", font=("Arial", 30, "bold"),
-                                                               anchor="nw", fill="White")
-        self.game_end_continue = self.table_canvas.create_text(350, 200, text=f"Continue", font=("Arial", 18, "bold"),
-                                                               anchor="nw", fill="White")
-        self.game_end_quit = self.table_canvas.create_text(350, 250, text=f"Quit", font=("Arial", 18, "bold"),
-                                                           anchor="nw", fill="White")
+        q_config = {"font": ("Arial", 30, "bold")}
+        o_config = [{"font": ("Arial", 18, "bold")}, {"font": ("Arial", 18, "bold")}]
+        result = self.show_question(300, 150, question="Game End", q_config=q_config,
+                                    options=["Continue", "Quit"],
+                                    o_config=o_config)
+        [frame, self.game_end_area, self.game_end_question, [self.game_end_continue, self.game_end_quit]] = result
 
     # Show Card
     def show_card(self, x, y, card_loc, faced):
@@ -263,6 +290,10 @@ class Casino:
             self.is_insurance = True
             self.insurance_choice_yes.config(fg="black", bg="white")
             self.insurance_choice_no.config(fg="white", bg="black")
+        elif self.game_state == "game end":
+            self.game_choice = "continue"
+            self.game_end_continue.config(fg="black", bg="white")
+            self.game_end_quit.config(fg="white", bg="black")
         print("Up key pressed")
 
     def downKey(self, event):
@@ -270,6 +301,10 @@ class Casino:
             self.is_insurance = False
             self.insurance_choice_yes.config(fg="white", bg="black")
             self.insurance_choice_no.config(fg="black", bg="white")
+        elif self.game_state == "game end":
+            self.game_choice = "quit"
+            self.game_end_continue.config(fg="white", bg="black")
+            self.game_end_quit.config(fg="black", bg="white")
         print("Down key pressed")
 
     def leftKey(self, event):
@@ -284,4 +319,13 @@ class Casino:
             self.table_canvas.delete(self.insurance_area)
             self.game_state = "blackjack"
             self.check_blackjack()
+
+        elif self.game_state == "game end":
+            if self.game_choice == "continue":
+                pass
+            elif self.game_choice == "quit":
+                self.table_canvas.delete("all")
+                welcome_ = welcome.Welcome(self.game, self.window, self.table_canvas, self.window_width,
+                                           self.window_height, self.padding)
+
         print("Enter key pressed")
