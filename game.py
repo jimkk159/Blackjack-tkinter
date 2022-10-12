@@ -41,10 +41,7 @@ class Blackjack:
         if self.is_insurance:
             self.ask_insurance()
         self.check_blackjack()
-        # self.players.leave_game()
-        # self.leave_and_money()
-        # self.players.print_all_result()
-        #
+
         # self.choice()
         # self.players.leave_game()
         # self.leave_and_money()
@@ -118,7 +115,6 @@ class Blackjack:
                 player.money -= floor(player.stake / 2)
                 player.insurance = True
 
-
     # Check Sum
     def check_sum(self, cards_in_hand):
 
@@ -158,16 +154,27 @@ class Blackjack:
 
     def check_blackjack(self):
 
-        for player in self.players.in_:
-            if self.check_cards_blackjack(self.banker):
+        if self.check_cards_blackjack(self.banker):
+
+            for player in self.players.in_:
 
                 if self.check_cards_blackjack(player.hands[0].cards):
                     player.hands[0].result = "push"
                 else:
                     player.hands[0].result = "lose"
 
-            elif self.check_cards_blackjack(player.hands[0].cards):
+            return True  # Mean Game End
+
+        for player in self.players.in_:
+
+            if self.check_cards_blackjack(player.hands[0].cards):
                 player.hands[0].result = "blackjack"
+
+        # TODO only thing about the player 1 game end situation
+        if self.check_cards_blackjack(self.players.in_[0].hands[0].cards):
+            return True # Mean Game End
+        else:
+            return False # Mean Game Continue
 
     # It's Player Round
     def choice(self):

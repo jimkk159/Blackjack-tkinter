@@ -49,6 +49,9 @@ class Casino:
         self.img_suit_dict = {"heart": 0, "club": 1, "diamond": 2, "spade": 3}
         self.img_symbol_dict = {"faced": 0, "2": 1, "3": 2, "4": 3, "5": 4, "6": 5, "7": 6, "8": 7, "9": 8, "10": 9,
                                 "J": 10, "Q": 11, "K": 12, "A": 13}
+        self.game_choice_dict = {"insurance": {"yes": 0, "no": 1},
+                                 "choice": {"double": 0, "split": 1, "hit": 2, "stand": 4},
+                                 "end": {"continue": 0, "quit": 1}}
         self.game_state = "start"
         self.game_choice = None
 
@@ -63,6 +66,13 @@ class Casino:
         self.game_end_area = None
         self.game_end_continue = None
         self.game_end_quit = None
+
+        self.player_choice_question = None
+        self.player_choice_area = None
+        self.player_choice_double = None
+        self.player_choice_split = None
+        self.player_choice_hit = None
+        self.player_choice_stand = None
 
         self.banker_img = []
         self.players_img = []
@@ -133,30 +143,52 @@ class Casino:
         if self.is_ask_insurance:
             self.ask_insurance()
         else:
-            self.game_state = "blackjack"
+            self.game_state = "choice"
+            self.player_choice()
 
+    # Check Blackjack
     def check_blackjack(self):
         if self.game.check_cards_blackjack(self.game.banker):
             self.game.banker[0].faced = True
             self.show_banker_card()
-        self.game.check_blackjack()
+        game_end = self.game.check_blackjack()
         self.check_player_state()
-        self.update_money(self.game.get_players()[0])
-        self.update_stake(self.game.get_players()[0])
+        if game_end:
+            self.update_money(self.game.get_players()[0])
+            self.update_stake(self.game.get_players()[0])
         self.game.players.leave_game()
         self.game.leave_and_money()
+        if not game_end:
+            self.game_state = "choice"
+            self.player_choice()
 
+    # Ask Insurance
     def ask_insurance(self):
 
-        self.game_state = "insurance"
         if self.game.banker[1].symbol == "A" or (
                 self.is_over_ten and self.game.banker[1].symbol in ["A", "K", "Q", "J", "10"]):
+            self.game_state = "insurance"
+            self.game_choice = self.game_choice_dict["insurance"]["yes"]
             self.is_insurance = True
             # for num in range(self.player_num):
             x1, y1, x2, y2 = self.players_area_xy[0]
             result = self.show_question(x1 - 130, y1, question="Buy insurance?", options=["Yes", "No"])
             [frame, self.insurance_area, self.insurance_question,
              [self.insurance_choice_yes, self.insurance_choice_no]] = result
+        else:
+            self.game_state = "choice"
+            self.player_choice()
+
+    # Player Choice
+    def player_choice(self):
+        self.game_choice = self.game_choice_dict["choice"]["double"]
+        x1, y1, x2, y2 = self.players_area_xy[0]
+        q_config = {"font": ("Arial", 14, "bold")}
+        result = self.show_question(x1 - 145, y1 - 15, question="Your Choice:", q_config=q_config,
+                                    options=["Double down", "Split", "Hit", "Stand"])
+        [frame, self.player_choice_area, self.player_choice_question,
+         [self.player_choice_double, self.player_choice_split, self.player_choice_hit,
+          self.player_choice_stand]] = result
 
     # Show Question Area
     def show_question(self, x, y, question=None, q_config=None, options=None, o_config=None):
@@ -194,7 +226,7 @@ class Casino:
         game_result = all([(True if hand.result != "" else False) for hand in hands])
         if game_result:
             self.game_state = "game end"
-            self.game_choice = "continue"
+            self.game_choice = self.game_choice_dict["end"]["continue"]
             self.show_game_end()
 
     # Show Game End
@@ -305,27 +337,44 @@ class Casino:
         self.window.bind('<Right>', self.rightKey)
         self.window.bind('<Return>', self.enterKey)
 
+    def switch_choice(self, pre_choice, move, choices):
+
+        now_choice = pre_choice
+        if move == "up" and pre_choice > 0:
+            now_choice = pre_choice - 1
+        elif move == "down" and pre_choice < len(choices) - 1:
+            now_choice = pre_choice + 1
+        choices[pre_choice].config(fg="white", bg="black")
+        choices[now_choice].config(fg="black", bg="white")
+        return now_choice
+
     # Keyboard
     def upKey(self, event):
         if self.game_state == "insurance":
             self.is_insurance = True
-            self.insurance_choice_yes.config(fg="black", bg="white")
-            self.insurance_choice_no.config(fg="white", bg="black")
+            choice_list = [self.insurance_choice_yes, self.insurance_choice_no]
+            self.game_choice = self.switch_choice(self.game_choice, "up", choice_list)
         elif self.game_state == "game end":
-            self.game_choice = "continue"
-            self.game_end_continue.config(fg="black", bg="white")
-            self.game_end_quit.config(fg="white", bg="black")
+            choice_list = [self.game_end_continue, self.game_end_quit]
+            self.game_choice = self.switch_choice(self.game_choice, "up", choice_list)
+        elif self.game_state == "choice":
+            choice_list = [self.player_choice_double, self.player_choice_split, self.player_choice_hit,
+                           self.player_choice_stand]
+            self.game_choice = self.switch_choice(self.game_choice, "up", choice_list)
         print("Up key pressed")
 
     def downKey(self, event):
         if self.game_state == "insurance":
             self.is_insurance = False
-            self.insurance_choice_yes.config(fg="white", bg="black")
-            self.insurance_choice_no.config(fg="black", bg="white")
+            choice_list = [self.insurance_choice_yes, self.insurance_choice_no]
+            self.game_choice = self.switch_choice(self.game_choice, "down", choice_list)
         elif self.game_state == "game end":
-            self.game_choice = "quit"
-            self.game_end_continue.config(fg="white", bg="black")
-            self.game_end_quit.config(fg="black", bg="white")
+            choice_list = [self.game_end_continue, self.game_end_quit]
+            self.game_choice = self.switch_choice(self.game_choice, "down", choice_list)
+        elif self.game_state == "choice":
+            choice_list = [self.player_choice_double, self.player_choice_split, self.player_choice_hit,
+                           self.player_choice_stand]
+            self.game_choice = self.switch_choice(self.game_choice, "down", choice_list)
         print("Down key pressed")
 
     def leftKey(self, event):
@@ -342,10 +391,10 @@ class Casino:
             self.check_blackjack()
 
         elif self.game_state == "game end":
-            if self.game_choice == "continue":
+            if self.game_choice == self.game_choice_dict["end"]["continue"]:
                 self.game_start()
                 self.table_canvas.delete(self.game_end_area)
-            elif self.game_choice == "quit":
+            elif self.game_choice == self.game_choice_dict["end"]["quit"]:
                 self.table_canvas.delete("all")
                 welcome_ = welcome.Welcome(self.game, self.window, self.table_canvas, self.window_width,
                                            self.window_height, self.padding)
