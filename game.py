@@ -40,7 +40,7 @@ class Blackjack:
         #                                       Card(symbol='A', suit='heart')]
         if self.is_insurance:
             self.ask_insurance()
-        # self.check_blackjack()
+        self.check_blackjack()
         # self.players.leave_game()
         # self.leave_and_money()
         # self.players.print_all_result()
@@ -105,20 +105,19 @@ class Blackjack:
         self.deal(self.banker)
 
     # Game Start
-    def ask_insurance(self, choices):
+    def ask_insurance(self, choice):
 
-        if self.banker[1].symbol == "A" or (
-                self.is_insurance_over_10 and self.banker[1].symbol in card.poker_symbol[:5]):
-
-            for num in range(self.player_num):
-                self.ask_player_insurance(self.players[num], choices[num])
+        # for num in range(self.player_num):
+        self.ask_player_insurance(self.players.in_[0], choice)
 
     def ask_player_insurance(self, player, choice):
 
+        player.insurance = False
         if player.money >= floor(player.stake / 2):
             if choice:
                 player.money -= floor(player.stake / 2)
                 player.insurance = True
+
 
     # Check Sum
     def check_sum(self, cards_in_hand):

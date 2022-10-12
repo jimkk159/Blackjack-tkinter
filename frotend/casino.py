@@ -4,6 +4,7 @@ from PIL import Image, ImageTk
 from card import Card
 
 CHOICE_FONT = ("Arial", 10, "bold")
+PLAYER_STATE_FONT = ("Arial", 24, "bold")
 
 IMG_LEFT_BOUND = 10
 IMG_UP_BOUND = 10
@@ -30,7 +31,7 @@ class Casino:
         self.deck_num = self.game.get_deck_num()
         self.player_num = self.game.get_player_num()
         self.min_bet = self.game.get_min_bet()
-        self.is_insurance = self.game.get_is_insurance()
+        self.is_ask_insurance = self.game.get_is_insurance()
         self.is_over_ten = self.game.get_insurance_over_10()
         self.is_double = self.game.get_is_double()
         self.blackjack_ratio = self.game.get_blackjack_ratio()
@@ -47,8 +48,12 @@ class Casino:
         self.img_suit_dict = {"heart": 0, "club": 1, "diamond": 2, "spade": 3}
         self.img_symbol_dict = {"faced": 0, "2": 1, "3": 2, "4": 3, "5": 4, "6": 5, "7": 6, "8": 7, "9": 8, "10": 9,
                                 "J": 10, "Q": 11, "K": 12, "A": 13}
-        self.game_state = ""
+        self.game_state = "start"
 
+        self.is_insurance = None
+        self.insurance_choice_no = None
+        self.insurance_choice_yes = None
+        self.insurance_question = None
 
         # Table Image
         table_img = Image.open("../img/pixel-blackjack_big.png")
@@ -93,40 +98,61 @@ class Casino:
             self.players_area_xy.append((120, 230, 220, 310))
             self.players_area_xy.append((350, 260, 450, 340))
             self.players_area_xy.append((580, 230, 680, 310))
-
+        self.money = self.table_canvas.create_text(10, 10, text=f"Money: {self.game.get_player()[0].money}",
+                                                   font=PLAYER_STATE_FONT, anchor="nw", fill="black")
+        self.stake = self.table_canvas.create_text(10, 50, text=f"Stake: {self.game.get_player()[0].stake}",
+                                                   font=PLAYER_STATE_FONT, anchor="nw", fill="black")
         self.control_casino()
         self.game_start()
 
     def game_start(self):
 
-        # while not self.game.game_end:
         # Game start
-        self.game.reset()
-        self.game.deal_to_all()
-        self.game.banker = [Card(symbol='K', suit='spade'),
-                            Card(symbol='A', suit='heart')]
+
+        if self.game_state == "start":
+            self.game.reset()
+            self.game.deal_to_all()
+            self.game.banker = [Card(symbol='K', suit='spade', faced=False),
+                                Card(symbol='A', suit='heart')]
+            self.game_state = "insurance"
+
         self.show_banker_card()
         self.show_player_card()
 
-        if self.is_insurance:
+        if self.is_ask_insurance:
             self.ask_insurance()
+        else:
+            self.game_state = "blackjack"
+        print(self.game_state)
+        if self.game_state == "blackjack":
+            if self.game.check_cards_blackjack(self.game.banker):
+                self.game.banker[0].faced = True
+            self.game.check_blackjack()
+
+    def check_blackjack(self):
+        if self.game.check_cards_blackjack(self.game.banker):
+            self.game.banker[0].faced = True
+        self.game.check_blackjack()
+        self.game.leave_game()
+        self.game.leave_and_money()
 
     def ask_insurance(self):
 
         self.game_state = "insurance"
         if self.game.banker[1].symbol == "A" or (
                 self.is_over_ten and self.game.banker[1].symbol in ["A", "K", "Q", "J", "10"]):
+            self.is_insurance = True
             # for num in range(self.player_num):
             x1, y1, x2, y2 = self.players_area_xy[0]
             frame = Frame(self.window, height=100, width=100, bg="black")
             frame.grid()
-            insurance_question = Label(frame, text="Buy insurance?", fg="white", bg="black", font=CHOICE_FONT)
-            insurance_question.grid(column=0, row=0)
-            insurance_choice_yes = Label(frame, text="Yes", fg="black", bg="white", font=CHOICE_FONT)
-            insurance_choice_yes.grid(column=0, row=1)
-            insurance_choice_no = Label(frame, text="No", fg="white", bg="black", font=CHOICE_FONT)
-            insurance_choice_no.grid(column=0, row=2)
-            insurance_area = self.table_canvas.create_window(x1 - 130, y1, window=frame, anchor="nw")
+            self.insurance_question = Label(frame, text="Buy insurance?", fg="white", bg="black", font=CHOICE_FONT)
+            self.insurance_question.grid(column=0, row=0)
+            self.insurance_choice_yes = Label(frame, text="Yes", fg="black", bg="white", font=CHOICE_FONT)
+            self.insurance_choice_yes.grid(column=0, row=1)
+            self.insurance_choice_no = Label(frame, text="No", fg="white", bg="black", font=CHOICE_FONT)
+            self.insurance_choice_no.grid(column=0, row=2)
+            self.insurance_area = self.table_canvas.create_window(x1 - 130, y1, window=frame, anchor="nw")
             # insurance_area = self.table_canvas.create_rectangle(x1 - 130, y1, x2 - 130, y2, outline="black",
             #                                                     width=3)
 
@@ -142,7 +168,6 @@ class Casino:
         cards = self.game.banker
         for card_num in range(len(cards)):
             card = cards[card_num]
-            print(card.suit, card.symbol, self.img_suit_dict[card.suit], self.img_symbol_dict[card.symbol])
             card_loc = 14 * self.img_suit_dict[card.suit] + self.img_symbol_dict[card.symbol]
             self.show_card(325 + 68 * card_num + CARD_HORIZONTAL_MODIFY, 30, card_loc, card.faced)
 
@@ -161,6 +186,12 @@ class Casino:
                                    card_loc,
                                    card.faced)
 
+    def update_money(self, player):
+        self.money.config(text=f"Money: {player.money}")
+
+    def update_stake(self, player):
+        self.money.config(text=f"Money: {player.stake}")
+        
     # Control Table
     def control_casino(self):
         self.window.bind('<Up>', self.upKey)
@@ -168,3 +199,31 @@ class Casino:
         self.window.bind('<Left>', self.leftKey)
         self.window.bind('<Right>', self.rightKey)
         self.window.bind('<Return>', self.enterKey)
+
+    # Keyboard
+    def upKey(self, event):
+        if self.game_state == "insurance":
+            self.is_insurance = True
+            self.insurance_choice_yes.config(fg="black", bg="white")
+            self.insurance_choice_no.config(fg="white", bg="black")
+        print("Up key pressed")
+
+    def downKey(self, event):
+        if self.game_state == "insurance":
+            self.is_insurance = False
+            self.insurance_choice_yes.config(fg="white", bg="black")
+            self.insurance_choice_no.config(fg="black", bg="white")
+        print("Down key pressed")
+
+    def leftKey(self, event):
+        print("Left key pressed")
+
+    def rightKey(self, event):
+        print("Right key pressed")
+
+    def enterKey(self, event):
+        if self.game_state == "insurance":
+            self.game.ask_insurance(self.is_insurance)
+            self.table_canvas.delete(self.insurance_area)
+            self.game_state = "blackjack"
+        print("Enter key pressed")
