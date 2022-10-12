@@ -35,7 +35,7 @@ class Casino:
         self.is_over_ten = self.game.get_insurance_over_10()
         self.is_double = self.game.get_is_double()
         self.blackjack_ratio = self.game.get_blackjack_ratio()
-        self.players = self.game.get_player()
+        self.players = self.game.get_players()
 
         # Interface Attribute
         self.window = window
@@ -54,6 +54,9 @@ class Casino:
         self.insurance_choice_no = None
         self.insurance_choice_yes = None
         self.insurance_question = None
+
+        self.banker_img = []
+        self.players_img = []
 
         # Table Image
         table_img = Image.open("../img/pixel-blackjack_big.png")
@@ -98,9 +101,9 @@ class Casino:
             self.players_area_xy.append((120, 230, 220, 310))
             self.players_area_xy.append((350, 260, 450, 340))
             self.players_area_xy.append((580, 230, 680, 310))
-        self.money = self.table_canvas.create_text(10, 10, text=f"Money: {self.game.get_player()[0].money}",
+        self.money = self.table_canvas.create_text(10, 10, text=f"Money: {self.game.get_players()[0].money}",
                                                    font=PLAYER_STATE_FONT, anchor="nw", fill="black")
-        self.stake = self.table_canvas.create_text(10, 50, text=f"Stake: {self.game.get_player()[0].stake}",
+        self.stake = self.table_canvas.create_text(10, 50, text=f"Stake: {self.game.get_players()[0].stake}",
                                                    font=PLAYER_STATE_FONT, anchor="nw", fill="black")
         self.control_casino()
         self.game_start()
@@ -109,13 +112,11 @@ class Casino:
 
         # Game start
 
-        if self.game_state == "start":
-            self.game.reset()
-            self.game.deal_to_all()
-            self.game.banker = [Card(symbol='K', suit='spade', faced=False),
-                                Card(symbol='A', suit='heart')]
-            self.game_state = "insurance"
-
+        self.game.reset()
+        self.game.deal_to_all()
+        self.game.banker = [Card(symbol='K', suit='spade', faced=False),
+                            Card(symbol='A', suit='heart')]
+        self.game_state = "insurance"
         self.show_banker_card()
         self.show_player_card()
 
@@ -123,18 +124,18 @@ class Casino:
             self.ask_insurance()
         else:
             self.game_state = "blackjack"
-        print(self.game_state)
-        if self.game_state == "blackjack":
-            if self.game.check_cards_blackjack(self.game.banker):
-                self.game.banker[0].faced = True
-            self.game.check_blackjack()
 
     def check_blackjack(self):
         if self.game.check_cards_blackjack(self.game.banker):
             self.game.banker[0].faced = True
+            self.show_banker_card()
         self.game.check_blackjack()
-        self.game.leave_game()
+        print(self.game.get_players()[0].money)
+        print(self.game.get_players()[0].stake)
+        self.game.players.leave_game()
         self.game.leave_and_money()
+
+
 
     def ask_insurance(self):
 
@@ -156,20 +157,27 @@ class Casino:
             # insurance_area = self.table_canvas.create_rectangle(x1 - 130, y1, x2 - 130, y2, outline="black",
             #                                                     width=3)
 
+    # Show Card
     def show_card(self, x, y, card_loc, faced):
 
         if faced:
-            self.table_canvas.create_image(x, y, image=self.table_canvas.cards[card_loc], anchor="nw")
+            return self.table_canvas.create_image(x, y, image=self.table_canvas.cards[card_loc], anchor="nw")
         else:
-            self.table_canvas.create_image(x, y, image=self.table_canvas.cards[0], anchor="nw")
+            return self.table_canvas.create_image(x, y, image=self.table_canvas.cards[0], anchor="nw")
 
     def show_banker_card(self):
 
+        # Delete the previous card img
+        if not self.banker_img:
+            for img in self.banker_img:
+                self.table_canvas.delete(img)
+
+        # Create card img
         cards = self.game.banker
         for card_num in range(len(cards)):
             card = cards[card_num]
             card_loc = 14 * self.img_suit_dict[card.suit] + self.img_symbol_dict[card.symbol]
-            self.show_card(325 + 68 * card_num + CARD_HORIZONTAL_MODIFY, 30, card_loc, card.faced)
+            self.banker_img.append(self.show_card(325 + 68 * card_num + CARD_HORIZONTAL_MODIFY, 30, card_loc, card.faced))
 
     def show_player_card(self):
 
@@ -186,12 +194,13 @@ class Casino:
                                    card_loc,
                                    card.faced)
 
+    # Update Money
     def update_money(self, player):
         self.money.config(text=f"Money: {player.money}")
 
     def update_stake(self, player):
         self.money.config(text=f"Money: {player.stake}")
-        
+
     # Control Table
     def control_casino(self):
         self.window.bind('<Up>', self.upKey)
@@ -226,4 +235,5 @@ class Casino:
             self.game.ask_insurance(self.is_insurance)
             self.table_canvas.delete(self.insurance_area)
             self.game_state = "blackjack"
+            self.check_blackjack()
         print("Enter key pressed")

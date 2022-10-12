@@ -407,5 +407,5 @@ class Blackjack:
     def get_player_cards(self):
         return self.players.get_all_hands()
 
-    def get_player(self):
+    def get_players(self):
         return self.players.get_all_players()
