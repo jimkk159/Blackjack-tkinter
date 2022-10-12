@@ -83,7 +83,8 @@ class Welcome:
         stop_blink(self.window)
         self.table_canvas.delete("all")
         casino_ = casino.Casino(self.game, self.window, self.table_canvas, self.window_width, self.window_height,
-                               self.padding)
+                                self.padding)
+        del self
 
     def setting_choice(self):
         # Table Image
@@ -91,6 +92,7 @@ class Welcome:
         self.table_canvas.delete("all")
         setting_ = setting.Setting(self.game, self.window, self.table_canvas, self.window_width, self.window_height,
                                    self.padding)
+        del self
 
     def quit_choice(self):
         self.window.destroy()

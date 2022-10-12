@@ -128,7 +128,8 @@ class Casino:
         self.game_state = "insurance"
         self.show_banker_card()
         self.show_players_card()
-
+        self.update_money(self.game.get_players()[0])
+        self.update_stake(self.game.get_players()[0])
         if self.is_ask_insurance:
             self.ask_insurance()
         else:
@@ -140,8 +141,6 @@ class Casino:
             self.show_banker_card()
         self.game.check_blackjack()
         self.check_player_state()
-        print(self.game.get_players()[0].money)
-        print(self.game.get_players()[0].stake)
         self.update_money(self.game.get_players()[0])
         self.update_stake(self.game.get_players()[0])
         self.game.players.leave_game()
@@ -190,17 +189,39 @@ class Casino:
     # Check Player State
     def check_player_state(self):
 
+        # TODO only check player 1 now
         hands = self.game.get_players()[0].hands
         game_result = all([(True if hand.result != "" else False) for hand in hands])
         if game_result:
             self.game_state = "game end"
+            self.game_choice = "continue"
             self.show_game_end()
 
     # Show Game End
+    def show_hand_result(self):
+
+        game_result = ""
+        # TODO only check player 1 now
+        hands = self.game.get_players()[0].hands
+        for num in range(len(hands)):
+            if num != 0:
+                game_result += " "
+            if hands[num].result == "push":
+                game_result += "PUSH"
+            elif hands[num].result == "blackjack":
+                game_result += "BlackJack"
+            elif hands[num].result == "lose":
+                game_result += "LOSE"
+            elif hands[num].result == "win":
+                game_result += "WIN"
+        return game_result
+
     def show_game_end(self):
         q_config = {"font": ("Arial", 30, "bold")}
         o_config = [{"font": ("Arial", 18, "bold")}, {"font": ("Arial", 18, "bold")}]
-        result = self.show_question(300, 150, question="Game End", q_config=q_config,
+        game_result = self.show_hand_result()
+        result = self.show_question(300, 150, question=f"Result: {game_result}\n"
+                                                       f"Game End", q_config=q_config,
                                     options=["Continue", "Quit"],
                                     o_config=o_config)
         [frame, self.game_end_area, self.game_end_question, [self.game_end_continue, self.game_end_quit]] = result
@@ -322,10 +343,11 @@ class Casino:
 
         elif self.game_state == "game end":
             if self.game_choice == "continue":
-                pass
+                self.game_start()
+                self.table_canvas.delete(self.game_end_area)
             elif self.game_choice == "quit":
                 self.table_canvas.delete("all")
                 welcome_ = welcome.Welcome(self.game, self.window, self.table_canvas, self.window_width,
                                            self.window_height, self.padding)
-
+                del self
         print("Enter key pressed")

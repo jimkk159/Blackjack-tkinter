@@ -151,6 +151,7 @@ class Setting:
         stop_blink(self.window)
         welcome_ = welcome.Welcome(self.game, self.window, self.setting_canvas, self.window_width, self.window_height,
                                    self.padding)
+        del self
 
     def quit_choice(self):
         self.window.destroy()
