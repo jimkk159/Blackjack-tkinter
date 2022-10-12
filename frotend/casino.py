@@ -354,12 +354,12 @@ class Casino:
             self.is_insurance = True
             choice_list = [self.insurance_choice_yes, self.insurance_choice_no]
             self.game_choice = self.switch_choice(self.game_choice, "up", choice_list)
-        elif self.game_state == "game end":
-            choice_list = [self.game_end_continue, self.game_end_quit]
-            self.game_choice = self.switch_choice(self.game_choice, "up", choice_list)
         elif self.game_state == "choice":
             choice_list = [self.player_choice_double, self.player_choice_split, self.player_choice_hit,
                            self.player_choice_stand]
+            self.game_choice = self.switch_choice(self.game_choice, "up", choice_list)
+        elif self.game_state == "game end":
+            choice_list = [self.game_end_continue, self.game_end_quit]
             self.game_choice = self.switch_choice(self.game_choice, "up", choice_list)
         print("Up key pressed")
 
@@ -368,12 +368,12 @@ class Casino:
             self.is_insurance = False
             choice_list = [self.insurance_choice_yes, self.insurance_choice_no]
             self.game_choice = self.switch_choice(self.game_choice, "down", choice_list)
-        elif self.game_state == "game end":
-            choice_list = [self.game_end_continue, self.game_end_quit]
-            self.game_choice = self.switch_choice(self.game_choice, "down", choice_list)
         elif self.game_state == "choice":
             choice_list = [self.player_choice_double, self.player_choice_split, self.player_choice_hit,
                            self.player_choice_stand]
+            self.game_choice = self.switch_choice(self.game_choice, "down", choice_list)
+        elif self.game_state == "game end":
+            choice_list = [self.game_end_continue, self.game_end_quit]
             self.game_choice = self.switch_choice(self.game_choice, "down", choice_list)
         print("Down key pressed")
 
@@ -389,7 +389,15 @@ class Casino:
             self.table_canvas.delete(self.insurance_area)
             self.game_state = "blackjack"
             self.check_blackjack()
-
+        elif self.game_state == "choice":
+            if self.game_choice == self.game_choice_dict["choice"]["double"]:
+                pass
+            elif self.game_choice == self.game_choice_dict["choice"]["split"]:
+                pass
+            elif self.game_choice == self.game_choice_dict["choice"]["hit"]:
+                pass
+            elif self.game_choice == self.game_choice_dict["choice"]["stand"]:
+                pass
         elif self.game_state == "game end":
             if self.game_choice == self.game_choice_dict["end"]["continue"]:
                 self.game_start()
