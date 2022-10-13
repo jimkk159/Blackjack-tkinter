@@ -10,7 +10,7 @@ class Hand:
 
 class Player:
 
-    def __init__(self, id_, money=100, init_stake=5):
+    def __init__(self, id_, money=50, init_stake=10):
         self.id = id_
         self.money = money
         self.basic_stake = init_stake
@@ -91,18 +91,18 @@ class Players:
 
         for player in self.in_:
 
-            while True:
+            # while True:
                 # player.stake = int(input("How much money do you want to bet?"))
-
-                # Check Player stake
-                if player.basic_stake >= player.money:
-                    player.basic_stake = player.money
-                    print("All in")
-
-                elif player.basic_stake < min_bet:
-                    print(f"At least {min_bet} dollar")
-                    continue
-                break
+            player.total_stake = player.basic_stake
+                # # Check Player stake
+                # if player.basic_stake >= player.money:
+                #     player.basic_stake = player.money
+                #     print("All in")
+                #
+                # elif player.basic_stake < min_bet:
+                #     print(f"At least {min_bet} dollar")
+                #     continue
+                # break
 
     # Pay Stake
     def pay_stake(self):

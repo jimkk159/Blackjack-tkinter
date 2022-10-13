@@ -238,7 +238,6 @@ class Casino:
     # Destroy Canvas OBJ
     def destroy_obj(self, obj):
         if obj:
-            print(2)
             self.table_canvas.delete(obj)
 
     # Show Question
@@ -468,7 +467,6 @@ class Casino:
                 self.game_start()
                 # Destroy previous Area
                 self.destroy_obj(self.game_end_area)
-                print(1)
             elif self.game_choice == self.game_choice_dict["end"]["quit"]:
                 self.table_canvas.delete("all")
                 welcome_ = welcome.Welcome(self.game, self.window, self.table_canvas, self.window_width,
