@@ -135,8 +135,8 @@ class Casino:
         self.game.deal_to_all()
         # self.game.banker = [Card(symbol='K', suit='spade', faced=False),
         #                     Card(symbol='A', suit='heart')]
-        self.game.get_players()[0].hands[0].cards = [Card(symbol='A', suit='spade'),
-                                                     Card(symbol='A', suit='heart')]
+        # self.game.get_players()[0].hands[0].cards = [Card(symbol='A', suit='spade'),
+        #                                              Card(symbol='A', suit='heart')]
         self.game_state = "insurance"
         self.show_banker_card()
         self.show_players_card()
@@ -276,7 +276,7 @@ class Casino:
     def show_banker_card(self):
 
         # Delete the previous card img
-        if not self.banker_img:
+        if self.banker_img:
             self.delete_imgs(self.banker_img)
             self.banker_img = []
 
@@ -299,12 +299,12 @@ class Casino:
     def show_player_card(self, player_num, x, y):
 
         # Delete the previous card img
-        if not self.players_img:
+        if self.players_img:
             if len(self.players_img) > player_num:
                 for cards_img in self.players_img[player_num]:
                     self.delete_imgs(cards_img)
                 self.players_img[player_num] = []
-
+            print(self.players_img)
         # Create a list to save specific player img
         while len(self.players_img) <= player_num:
             self.players_img.append([])
