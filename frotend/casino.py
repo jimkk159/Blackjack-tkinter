@@ -48,36 +48,13 @@ class Casino:
         self.img_suit_dict = {"heart": 0, "club": 1, "diamond": 2, "spade": 3}
         self.img_symbol_dict = {"faced": 0, "2": 1, "3": 2, "4": 3, "5": 4, "6": 5, "7": 6, "8": 7, "9": 8, "10": 9,
                                 "J": 10, "Q": 11, "K": 12, "A": 13}
-        self.game_choice_dict = {"insurance": {"yes": 0, "no": 1},
-                                 "choice": {"double": 0, "split": 1, "hit": 2, "stand": 4},
-                                 "end": {"continue": 0, "quit": 1}}
+        self.game_interface_dict = {"insurance": None,
+                                    "choice": None,
+                                    "end": None}
         self.game_state = "start"
-        self.game_choice = None
-        self.game_choice_first = None
+        self.game_choice = 0
 
         self.is_insurance = None
-
-        self.insurance_frame = None
-        self.insurance_area = None
-        self.insurance_question = None
-        self.insurance_choice_yes = None
-        self.insurance_choice_no = None
-
-        self.game_end_frame = None
-        self.game_end_area = None
-        self.game_end_question = None
-        self.game_end_result = None
-        self.game_end_continue = None
-        self.game_end_quit = None
-
-        self.player_choice_frame = None
-        self.player_choice_question = None
-        self.player_choice_area = None
-        self.player_option_result = None
-        self.player_choice_double = None
-        self.player_choice_split = None
-        self.player_choice_hit = None
-        self.player_choice_stand = None
 
         self.banker_img = []
         self.players_img = []
@@ -162,43 +139,47 @@ class Casino:
             self.game.banker[0].faced = True
             self.show_banker_card()
         game_end = self.game.check_blackjack()
-        self.check_player_end()
+        game_end = self.check_game_end()
+        if not game_end:
+            self.player_choice()
+
+    # End Process
+    def check_game_end(self):
+
+        # ToDo only care player 1 win or lose now
+        game_end = self.check_player_end()
         if game_end:
             self.update_money(self.game.get_players()[0])
             self.update_stake(self.game.get_players()[0])
         self.game.players.leave_game()
         self.game.leave_and_money()
-        if not game_end:
-            self.player_choice()
+        return game_end
 
     # Ask Insurance
     def ask_insurance(self):
 
         if self.game.get_judge_insurance():
             self.game_state = "insurance"
-            self.game_choice = self.game_choice_dict["insurance"]["yes"]
-            self.game_choice_first = self.game_choice_dict["insurance"]["yes"]
+            self.game_choice = 0
             self.is_insurance = True
 
             # Create Area
             # for num in range(self.player_num):
             x1, y1, x2, y2 = self.players_area_xy[0]
             result = self.show_question(x1 - 130, y1, question="Buy insurance?", options=["Yes", "No"])
-            [self.insurance_frame, self.insurance_area, self.insurance_question,
-             [self.insurance_choice_yes, self.insurance_choice_no]] = result
+            self.game_interface_dict[self.game_state] = result
         else:
             self.player_choice()
 
     # Player Choice
     def player_choice(self):
         self.game_state = "choice"
-        # self.game_choice = self.game_choice_dict["choice"]["double"]
         x1, y1, x2, y2 = self.players_area_xy[0]
         q_config = {"font": ("Arial", 14, "bold")}
-        player_option_dict = {"double": ["Double down", self.player_choice_double],
-                              "split": ["Split", self.player_choice_split],
-                              "hit": ["Hit", self.player_choice_hit],
-                              "stand": ["Stand", self.player_choice_stand]}
+        player_option_dict = {"double": "Double down",
+                              "split": "Split",
+                              "hit": "Hit",
+                              "stand": "Stand"}
 
         # Create Area
         player_option = []
@@ -207,50 +188,43 @@ class Casino:
         plyer_one = self.game.get_players()[0]
         plyer_one_hand = self.game.get_players()[0].hands[0]
 
-        self.game_choice = self.get_hand_first_choice_num(plyer_one, plyer_one_hand)
-        self.game_choice_first = self.get_hand_first_choice_num(plyer_one, plyer_one_hand)
+        self.game_choice = 0
 
         options = self.game.get_player_option(plyer_one, plyer_one_hand)
         for option in options:
-            player_option.append(player_option_dict[option][0])
+            player_option.append(player_option_dict[option])
 
-        print(options, self.game_choice)
         result = self.show_question(x1 - 145, y1 - 15, question="Your Choice:", q_config=q_config,
-                                    options=player_option)
-        [self.player_choice_frame, self.player_choice_area, self.player_choice_question,
-         self.player_option_result] = result
-
-    def get_hand_first_choice(self, player, hand):
-        return self.game.get_player_option(player, hand)[0]
-
-    def get_hand_first_choice_num(self, player, hand):
-        return self.game_choice_dict["choice"][self.get_hand_first_choice(player, hand)]
+                                    options=player_option, o_index=options)
+        self.game_interface_dict[self.game_state] = result
 
     # Show Question Area
-    def show_question_block(self, frame, items, item_config, row):
+    def show_question_block(self, frame, items, item_config, row, index=None):
 
         if items:
 
             if type(items) != list:
-                items_ = Label(frame, text=items, fg="white", bg="black", font=CHOICE_FONT)
+                item = Label(frame, text=items, fg="white", bg="black", font=CHOICE_FONT)
                 if item_config:
-                    items_.config(item_config)
-                items_.grid(column=0, row=row)
-                return items_, row + 1
+                    item.config(item_config)
+                item.grid(column=0, row=row)
+                return item, row + 1
             else:
-                item_array = []
+                item_dict = {}
                 temp_row = row
                 for num in range(len(items)):
                     if num == 0:
-                        items_ = Label(frame, text=items[num], fg="black", bg="white", font=CHOICE_FONT)
+                        item = Label(frame, text=items[num], fg="black", bg="white", font=CHOICE_FONT)
                     else:
-                        items_ = Label(frame, text=items[num], fg="white", bg="black", font=CHOICE_FONT)
+                        item = Label(frame, text=items[num], fg="white", bg="black", font=CHOICE_FONT)
                     if item_config and item_config[num]:
-                        items_.config(item_config[num])
-                    items_.grid(column=0, row=temp_row)
-                    item_array.append(items_)
+                        item.config(item_config[num])
+                    item.grid(column=0, row=temp_row)
+                    item_dict[num] = [item]
+                    if index:
+                        item_dict[num].append(index[num])
                     temp_row += 1
-                return item_array, temp_row + 1
+                return item_dict, temp_row + 1
         return items, row
 
     # Destroy Canvas OBJ
@@ -259,8 +233,8 @@ class Casino:
             self.table_canvas.delete(obj)
 
     # Show Question
-    def show_question(self, x, y, question=None, q_config=None, game_result=None, r_config=None, options=None,
-                      o_config=None):
+    def show_question(self, x, y, question=None, q_config=None, game_result=None, r_config=None
+                      , options=None, o_index=None, o_config=None):
 
         frame = Frame(self.window, bg="black")
         frame.grid()
@@ -268,16 +242,16 @@ class Casino:
         row = 0
         question, row = self.show_question_block(frame, question, q_config, row)
         game_result, row = self.show_question_block(frame, game_result, r_config, row)
-        options_array, row = self.show_question_block(frame, options, o_config, row)
+        options_dict, row = self.show_question_block(frame, options, o_config, row, index=o_index)
         area = self.table_canvas.create_window(x, y, window=frame, anchor="nw")
 
-        result = [frame, area]
+        result = {"frame": frame, "area": area}
         if question:
-            result.append(question)
+            result["question"] = question
         if game_result:
-            result.append(game_result)
+            result["result"] = game_result
         if options:
-            result.append(options_array)
+            result["options"] = options_dict
         return result
 
     # Check Player State
@@ -287,9 +261,8 @@ class Casino:
         hands = self.game.get_players()[0].hands
         game_result = all([(True if hand.result != "" else False) for hand in hands])
         if game_result:
-            self.game_state = "game end"
-            self.game_choice = self.game_choice_dict["end"]["continue"]
-            self.game_choice_first = self.game_choice_dict["end"]["continue"]
+            self.game_state = "end"
+            self.game_choice = 0
             self.show_game_end()
         return game_result
 
@@ -329,14 +302,9 @@ class Casino:
 
         # Create Area
         result = self.show_question(x, y, question=f"Game End", q_config=q_config,
-                                    game_result=f"Result: {game_result}\n", r_config=r_config,
-                                    options=options, o_config=o_config)
-        if self.game_state == "no money":
-            [self.game_end_frame, self.game_end_area, self.game_end_question, self.game_end_result,
-             [self.game_end_quit]] = result
-        else:
-            [self.game_end_frame, self.game_end_area, self.game_end_question, self.game_end_result,
-             [self.game_end_continue, self.game_end_quit]] = result
+                                    game_result=f"Result: {game_result}", r_config=r_config,
+                                    options=options, o_index=["continue", "quit"], o_config=o_config)
+        self.game_interface_dict[self.game_state] = result
 
     # Show Card
     def show_card(self, x, y, card_loc, faced):
@@ -419,42 +387,42 @@ class Casino:
     def switch_choice(self, pre_choice, move, choices):
 
         now_choice = pre_choice
-        if move == "up" and pre_choice - self.game_choice_first > 0:
+        if move == "up" and pre_choice > 0:
             now_choice = pre_choice - 1
-        elif move == "down" and pre_choice - self.game_choice_first < len(choices) - 1:
+        elif move == "down" and pre_choice < len(choices) - 1:
             now_choice = pre_choice + 1
-        choices[pre_choice - self.game_choice_first].config(fg="white", bg="black")
-        choices[now_choice - self.game_choice_first].config(fg="black", bg="white")
+        choices[pre_choice][0].config(fg="white", bg="black")
+        choices[now_choice][0].config(fg="black", bg="white")
         return now_choice
 
     # Keyboard
     def upKey(self, event):
-        print(self.game_choice)
         if self.game_state == "insurance":
             self.is_insurance = True
-            choice_list = [self.insurance_choice_yes, self.insurance_choice_no]
-            self.game_choice = self.switch_choice(self.game_choice, "up", choice_list)
+            self.game_choice = self.switch_choice(self.game_choice, "up",
+                                                  self.game_interface_dict[self.game_state]["options"])
         elif self.game_state == "choice":
-            choice_list = self.player_option_result
-            self.game_choice = self.switch_choice(self.game_choice, "up", choice_list)
-        elif self.game_state == "game end":
-            choice_list = [self.game_end_continue, self.game_end_quit]
-            self.game_choice = self.switch_choice(self.game_choice, "up", choice_list)
-        print("Up key pressed")
+            self.game_choice = self.switch_choice(self.game_choice, "up",
+                                                  self.game_interface_dict[self.game_state]["options"])
+            print(self.game_choice)
+        elif self.game_state == "end":
+            self.game_choice = self.switch_choice(self.game_choice, "up",
+                                                  self.game_interface_dict[self.game_state]["options"])
+        print("Up key pressed", self.game_state)
 
     def downKey(self, event):
-        print(self.game_choice)
         if self.game_state == "insurance":
             self.is_insurance = False
-            choice_list = [self.insurance_choice_yes, self.insurance_choice_no]
-            self.game_choice = self.switch_choice(self.game_choice, "down", choice_list)
+            self.game_choice = self.switch_choice(self.game_choice, "down",
+                                                  self.game_interface_dict[self.game_state]["options"])
         elif self.game_state == "choice":
-            choice_list = self.player_option_result
-            self.game_choice = self.switch_choice(self.game_choice, "down", choice_list)
-        elif self.game_state == "game end":
-            choice_list = [self.game_end_continue, self.game_end_quit]
-            self.game_choice = self.switch_choice(self.game_choice, "down", choice_list)
-        print("Down key pressed")
+            self.game_choice = self.switch_choice(self.game_choice, "down",
+                                                  self.game_interface_dict[self.game_state]["options"])
+            print(self.game_choice)
+        elif self.game_state == "end":
+            self.game_choice = self.switch_choice(self.game_choice, "down",
+                                                  self.game_interface_dict[self.game_state]["options"])
+        print("Down key pressed", self.game_state)
 
     def leftKey(self, event):
         print("Left key pressed")
@@ -466,32 +434,38 @@ class Casino:
         if self.game_state == "insurance":
             self.game.ask_insurance(self.is_insurance)
             # Destroy previous Area
-            self.destroy_obj(self.insurance_area)
+            self.destroy_obj(self.game_interface_dict["insurance"]["area"])
             self.game_state = "blackjack"
             self.check_blackjack()
         elif self.game_state == "choice":
-            if self.game_choice == self.game_choice_dict["choice"]["double"]:
+            game_choice_ = self.game_interface_dict[self.game_state]["options"][self.game_choice][1]
+            print(self.game_interface_dict[self.game_state]["options"][self.game_choice][1])
+            if game_choice_ == "double":
                 self.game.double_down_process(self.game.get_players()[0])
-                self.update_money(self.game.get_players()[0])
-                self.update_stake(self.game.get_players()[0])
                 self.show_players_card()
-                self.destroy_obj(self.player_choice_area)
-            elif self.game_choice == self.game_choice_dict["choice"]["split"]:
+                self.destroy_obj(self.game_interface_dict["choice"]["area"])
+                if self.check_game_end():
+                    self.game_state = "end"
+                else:
+                    self.game_state = "banker"
+            elif game_choice_ == "split":
                 pass
-            elif self.game_choice == self.game_choice_dict["choice"]["hit"]:
+            elif game_choice_ == "hit":
                 if not self.check_player_end():
-                    self.destroy_obj(self.player_choice_area)
+                    self.destroy_obj(self.game_interface_dict["choice"]["area"])
                     self.player_choice()
-            elif self.game_choice == self.game_choice_dict["choice"]["stand"]:
-                pass
-
-
-        elif self.game_state == "game end":
-            if self.game_choice == self.game_choice_dict["end"]["continue"]:
-                self.game_start()
+            elif game_choice_ == "stand":
+                self.destroy_obj(self.game_interface_dict["choice"]["area"])
+                self.game_state = "banker"
+                print(2)
+        elif self.game_state == "end":
+            game_choice_ = self.game_interface_dict[self.game_state]["options"][self.game_choice][1]
+            if game_choice_ == "continue":
                 # Destroy previous Area
-                self.destroy_obj(self.game_end_area)
-            elif self.game_choice == self.game_choice_dict["end"]["quit"]:
+                self.destroy_obj(self.game_interface_dict["end"]["area"])
+                self.game_start()
+
+            elif game_choice_ == "quit":
                 self.table_canvas.delete("all")
                 welcome_ = welcome.Welcome(self.game, self.window, self.table_canvas, self.window_width,
                                            self.window_height, self.padding)
@@ -501,4 +475,4 @@ class Casino:
             welcome_ = welcome.Welcome(self.game, self.window, self.table_canvas, self.window_width,
                                        self.window_height, self.padding)
             del self
-        print("Enter key pressed")
+        print("Enter key pressed", self.game_state)
