@@ -26,7 +26,6 @@ class Casino:
 
         # Game reset
         self.game.reset_player()
-        self.game.reset()
 
         # Game Attribute
         self.deck_num = self.game.get_deck_num()
@@ -62,8 +61,9 @@ class Casino:
         self.insurance_choice_yes = None
         self.insurance_choice_no = None
 
-        self.game_end_question = None
         self.game_end_area = None
+        self.game_end_question = None
+        self.game_end_result = None
         self.game_end_continue = None
         self.game_end_quit = None
 
@@ -131,22 +131,27 @@ class Casino:
     def game_start(self):
 
         # Game start
-        self.game.reset()
-        self.game.deal_to_all()
-        # self.game.banker = [Card(symbol='K', suit='spade', faced=False),
-        #                     Card(symbol='A', suit='heart')]
-        # self.game.get_players()[0].hands[0].cards = [Card(symbol='A', suit='spade'),
-        #                                              Card(symbol='A', suit='heart')]
-        self.game_state = "insurance"
-        self.show_banker_card()
-        self.show_players_card()
-        self.update_money(self.game.get_players()[0])
-        self.update_stake(self.game.get_players()[0])
-        if self.is_ask_insurance:
-            self.ask_insurance()
+        reset_result = self.game.reset()
+        if reset_result[0]:
+            self.game.deal_to_all()
+
+            # self.game.banker = [Card(symbol='K', suit='spade', faced=False),
+            #                     Card(symbol='A', suit='heart')]
+            # self.game.get_players()[0].hands[0].cards = [Card(symbol='A', suit='spade'),
+            #                                              Card(symbol='A', suit='heart')]
+            self.game_state = "insurance"
+            self.show_banker_card()
+            self.show_players_card()
+            self.update_money(self.game.get_players()[0])
+            self.update_stake(self.game.get_players()[0])
+            if self.is_ask_insurance:
+                self.ask_insurance()
+            else:
+                self.game_state = "choice"
+                self.player_choice()
         else:
-            self.game_state = "choice"
-            self.player_choice()
+            self.game_state = "no money"
+            self.show_game_end()
 
     # Check Blackjack
     def check_blackjack(self):
@@ -198,32 +203,52 @@ class Casino:
          self.player_option_result] = result
 
     # Show Question Area
-    def show_question(self, x, y, question=None, q_config=None, options=None, o_config=None):
+    def show_question_block(self, frame, items, item_config, row):
+
+        if items:
+
+            if type(items) != list:
+                items = Label(frame, text=items, fg="white", bg="black", font=CHOICE_FONT)
+                if item_config:
+                    items.config(item_config)
+                    items.grid(column=0, row=row)
+                return items, row + 1
+            else:
+                item_array = []
+                temp_row = row
+                for num in range(len(items)):
+                    if num == 0:
+                        item = Label(frame, text=items[num], fg="black", bg="white", font=CHOICE_FONT)
+                    else:
+                        item = Label(frame, text=items[num], fg="white", bg="black", font=CHOICE_FONT)
+                    if item_config and item_config[num]:
+                        item.config(item_config[num])
+                    item.grid(column=0, row=temp_row)
+                    item_array.append(item)
+                    temp_row += 1
+                return item_array, temp_row + 1
+        return items, row
+
+    def show_question(self, x, y, question=None, q_config=None, game_result=None, r_config=None, options=None,
+                      o_config=None):
 
         frame = Frame(self.window, bg="black")
         frame.grid()
 
         row = 0
-        if question:
-            question = Label(frame, text=question, fg="white", bg="black", font=CHOICE_FONT)
-            if q_config:
-                question.config(q_config)
-            question.grid(column=0, row=row)
-            row += 1
-
-        options_array = []
-        for num in range(len(options)):
-            if num == 0:
-                option = Label(frame, text=options[num], fg="black", bg="white", font=CHOICE_FONT)
-            else:
-                option = Label(frame, text=options[num], fg="white", bg="black", font=CHOICE_FONT)
-            if o_config and o_config[num]:
-                option.config(o_config[num])
-            option.grid(column=0, row=row)
-            options_array.append(option)
-            row += 1
+        question, row = self.show_question_block(frame, question, q_config, row)
+        game_result, row = self.show_question_block(frame, game_result, r_config, row)
+        options_array, row = self.show_question_block(frame, options, o_config, row)
         area = self.table_canvas.create_window(x, y, window=frame, anchor="nw")
-        return [frame, area, question, options_array]
+
+        result = [frame, area]
+        if question:
+            result.append(question)
+        if game_result:
+            result.append(game_result)
+        if options:
+            result.append(options_array)
+        return result
 
     # Check Player State
     def check_player_end(self):
@@ -257,13 +282,27 @@ class Casino:
 
     def show_game_end(self):
         q_config = {"font": ("Arial", 30, "bold")}
+        r_config = {"font": ("Arial", 18, "bold")}
         o_config = [{"font": ("Arial", 18, "bold")}, {"font": ("Arial", 18, "bold")}]
-        game_result = self.show_hand_result()
-        result = self.show_question(300, 150, question=f"Result: {game_result}\n"
-                                                       f"Game End", q_config=q_config,
-                                    options=["Continue", "Quit"],
-                                    o_config=o_config)
-        [frame, self.game_end_area, self.game_end_question, [self.game_end_continue, self.game_end_quit]] = result
+        if self.game_state == "no money":
+            x = 243
+            y = 130
+            game_result = "Not Enough Money"
+            options = ["Quit"]
+        else:
+            x = 300
+            y = 150
+            game_result = self.show_hand_result()
+            options = ["Continue", "Quit"]
+
+        result = self.show_question(x, y, question=f"Game End", q_config=q_config,
+                                    game_result=f"Result: {game_result}\n", r_config=r_config,
+                                    options=options, o_config=o_config)
+        if self.game_state == "no money":
+            [frame, self.game_end_area, self.game_end_question, self.game_end_result, [self.game_end_quit]] = result
+        else:
+            [frame, self.game_end_area, self.game_end_question, self.game_end_result,
+             [self.game_end_continue, self.game_end_quit]] = result
 
     # Show Card
     def show_card(self, x, y, card_loc, faced):
@@ -304,7 +343,6 @@ class Casino:
                 for cards_img in self.players_img[player_num]:
                     self.delete_imgs(cards_img)
                 self.players_img[player_num] = []
-            print(self.players_img)
         # Create a list to save specific player img
         while len(self.players_img) <= player_num:
             self.players_img.append([])
@@ -416,4 +454,9 @@ class Casino:
                 welcome_ = welcome.Welcome(self.game, self.window, self.table_canvas, self.window_width,
                                            self.window_height, self.padding)
                 del self
+        elif self.game_state == "no money":
+            self.table_canvas.delete("all")
+            welcome_ = welcome.Welcome(self.game, self.window, self.table_canvas, self.window_width,
+                                       self.window_height, self.padding)
+            del self
         print("Enter key pressed")

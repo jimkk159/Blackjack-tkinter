@@ -68,13 +68,15 @@ class Blackjack:
             self.deck.reset_deck()
 
         # Reset Player
-        self.players.reset_all(self.min_bet)
+        result = self.players.reset_all(self.min_bet)
 
         # Reset Banker Cards
         self.banker = []
 
         # Nobody leave
         self.leave_man = 0
+
+        return result
 
     def reset_player(self):
         self.players = Players(self.player_num)

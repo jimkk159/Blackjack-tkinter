@@ -12,9 +12,9 @@ class Player:
 
     def __init__(self, id_, money=100, init_stake=5):
         self.id = id_
+        self.money = money
         self.basic_stake = init_stake
         self.total_stake = init_stake
-        self.money = money
         self.hands = []
         self.fold = False
         self.double = False
@@ -51,6 +51,7 @@ class Player:
     def get_hands(self):
         return self.hands
 
+
 class Players:
 
     def __init__(self, player_num):
@@ -71,11 +72,12 @@ class Players:
 
         self.enter()
         self.set_stake(min_bet)
-        self.pay_stake()
+        result = self.pay_stake()
         self.reset_double()
         self.reset_fold()
         self.reset_insurance()
         self.reset_hands()
+        return result
 
     # Enter table
     def enter(self):
@@ -105,8 +107,14 @@ class Players:
     # Pay Stake
     def pay_stake(self):
 
+        result = []
         for player in self.in_:
-            player.money -= player.basic_stake
+            if player.money > player.basic_stake:
+                player.money -= player.basic_stake
+                result.append(True)
+            else:
+                result.append(False)
+        return result
 
     # Reset Double
     def reset_double(self):
