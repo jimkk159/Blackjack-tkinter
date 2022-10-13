@@ -10,7 +10,7 @@ class Hand:
 
 class Player:
 
-    def __init__(self, id_, money=50, init_stake=10):
+    def __init__(self, id_, money=100, init_stake=5):
         self.id = id_
         self.money = money
         self.basic_stake = init_stake
