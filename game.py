@@ -135,8 +135,9 @@ class Blackjack:
 
     def check_sum_switch_ace(self, cards_in_hand):
 
-        if self.check_sum(cards_in_hand) > 21:
-            self.switch_ace_value(cards_in_hand)
+        while self.check_sum(cards_in_hand) > 21:
+            if not self.switch_ace_value(cards_in_hand):
+                break
 
         return self.check_sum(cards_in_hand)
 
@@ -263,6 +264,11 @@ class Blackjack:
 
     def double_down_process(self, player):
         self.double_down(player)
+        if self.get_is_hand_bust(player.hands[0].cards):
+            player.hands[0].result = "lose"
+
+    def hit_process(self, player):
+        self.deal(player.hands[0].cards)
         if self.get_is_hand_bust(player.hands[0].cards):
             player.hands[0].result = "lose"
 

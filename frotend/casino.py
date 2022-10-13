@@ -48,9 +48,10 @@ class Casino:
         self.img_suit_dict = {"heart": 0, "club": 1, "diamond": 2, "spade": 3}
         self.img_symbol_dict = {"faced": 0, "2": 1, "3": 2, "4": 3, "5": 4, "6": 5, "7": 6, "8": 7, "9": 8, "10": 9,
                                 "J": 10, "Q": 11, "K": 12, "A": 13}
-        self.game_interface_dict = {"insurance": None,
-                                    "choice": None,
-                                    "end": None}
+        self.game_interface_dict = {
+            "insurance": {"frame": None, "area": None, "question": None, "result": None, "options": None},
+            "choice": {"frame": None, "area": None, "question": None, "result": None, "options": None},
+            "end": {"frame": None, "area": None, "question": None, "result": None, "options": None}}
         self.game_state = "start"
         self.game_choice = 0
 
@@ -118,8 +119,9 @@ class Casino:
 
             # self.game.banker = [Card(symbol='K', suit='spade', faced=False),
             #                     Card(symbol='A', suit='heart')]
-            # self.game.get_players()[0].hands[0].cards = [Card(symbol='A', suit='spade'),
-            #                                              Card(symbol='A', suit='heart')]
+            self.game.get_players()[0].hands[0].cards = [Card(symbol='A', suit='spade'),
+                                                         Card(symbol='A', suit='heart'),
+                                                         Card(symbol='A', suit='club')]
             self.game_state = "insurance"
             self.show_banker_card()
             self.show_players_card()
@@ -439,6 +441,7 @@ class Casino:
             game_choice_ = self.game_interface_dict[self.game_state]["options"][self.game_choice][1]
 
             if game_choice_ == "double":
+                # ToDo Only Player 1
                 self.game.double_down_process(self.game.get_players()[0])
                 self.show_players_card()
                 self.destroy_obj(self.game_interface_dict["choice"]["area"])
@@ -449,8 +452,15 @@ class Casino:
             elif game_choice_ == "split":
                 pass
             elif game_choice_ == "hit":
-                if not self.check_player_end():
-                    self.destroy_obj(self.game_interface_dict["choice"]["area"])
+                # ToDo Only Player 1
+                self.game.hit_process(self.game.get_players()[0])
+                print(self.game.check_sum_switch_ace(self.game.get_players()[0].hands[0].cards))
+                print(self.game.check_sum_switch_ace(self.game.get_players()[0].hands[0].cards))
+                self.show_players_card()
+                self.destroy_obj(self.game_interface_dict["choice"]["area"])
+                if self.check_game_end():
+                    self.game_state = "end"
+                else:
                     self.player_choice()
             elif game_choice_ == "stand":
                 self.destroy_obj(self.game_interface_dict["choice"]["area"])
