@@ -404,11 +404,10 @@ class Casino:
         elif self.game_state == "choice":
             self.game_choice = self.switch_choice(self.game_choice, "up",
                                                   self.game_interface_dict[self.game_state]["options"])
-            print(self.game_choice)
         elif self.game_state == "end":
             self.game_choice = self.switch_choice(self.game_choice, "up",
                                                   self.game_interface_dict[self.game_state]["options"])
-        print("Up key pressed", self.game_state)
+        print("Up key pressed")
 
     def downKey(self, event):
         if self.game_state == "insurance":
@@ -418,11 +417,10 @@ class Casino:
         elif self.game_state == "choice":
             self.game_choice = self.switch_choice(self.game_choice, "down",
                                                   self.game_interface_dict[self.game_state]["options"])
-            print(self.game_choice)
         elif self.game_state == "end":
             self.game_choice = self.switch_choice(self.game_choice, "down",
                                                   self.game_interface_dict[self.game_state]["options"])
-        print("Down key pressed", self.game_state)
+        print("Down key pressed")
 
     def leftKey(self, event):
         print("Left key pressed")
@@ -439,7 +437,7 @@ class Casino:
             self.check_blackjack()
         elif self.game_state == "choice":
             game_choice_ = self.game_interface_dict[self.game_state]["options"][self.game_choice][1]
-            print(self.game_interface_dict[self.game_state]["options"][self.game_choice][1])
+
             if game_choice_ == "double":
                 self.game.double_down_process(self.game.get_players()[0])
                 self.show_players_card()
@@ -457,7 +455,7 @@ class Casino:
             elif game_choice_ == "stand":
                 self.destroy_obj(self.game_interface_dict["choice"]["area"])
                 self.game_state = "banker"
-                print(2)
+
         elif self.game_state == "end":
             game_choice_ = self.game_interface_dict[self.game_state]["options"][self.game_choice][1]
             if game_choice_ == "continue":
@@ -475,4 +473,4 @@ class Casino:
             welcome_ = welcome.Welcome(self.game, self.window, self.table_canvas, self.window_width,
                                        self.window_height, self.padding)
             del self
-        print("Enter key pressed", self.game_state)
+        print("Enter key pressed")
