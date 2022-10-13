@@ -364,7 +364,7 @@ class Casino:
             for card_num in range(len(cards)):
                 card = cards[card_num]
                 card_loc = 14 * self.img_suit_dict[card.suit] + self.img_symbol_dict[card.symbol]
-                card_img = self.show_card(x + 68 * card_num + CARD_HORIZONTAL_MODIFY, y, card_loc, card.faced)
+                card_img = self.show_card(x + 20 * card_num + CARD_HORIZONTAL_MODIFY, y, card_loc, card.faced)
                 self.players_img[player_num][hand_num].append(card_img)
 
     def delete_imgs(self, imgs):
