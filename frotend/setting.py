@@ -265,28 +265,28 @@ class Setting:
             self.setting_state = self.setting_state_dict["modify"]
             if self.choice_state == [0, 0]:
                 start_blink(self.window, self.setting_canvas, self.deck_num_item, 1000, 750)
-                print("deck")
+                print("setting deck")
             elif self.choice_state == [0, 1]:
                 start_blink(self.window, self.setting_canvas, self.player_num_item, 1000, 750)
-                print("player")
+                print("setting player")
             elif self.choice_state == [0, 2]:
                 start_blink(self.window, self.setting_canvas, self.bet_num_item, 1000, 750)
-                print("bet")
+                print("setting bet")
             elif self.choice_state == [0, 3]:
                 start_blink(self.window, self.setting_canvas, self.is_insurance_item, 1000, 750)
-                print("insurance")
+                print("setting insurance")
             elif self.choice_state == [0, 4]:
                 start_blink(self.window, self.setting_canvas, self.is_over_ten_item, 1000, 750)
-                print("over_ten")
+                print("setting over_ten")
             elif self.choice_state == [0, 5]:
                 start_blink(self.window, self.setting_canvas, self.is_double_down_item, 1000, 750)
-                print("double_down")
+                print("setting double_down")
             elif self.choice_state == [1, 0]:
                 start_blink(self.window, self.setting_canvas, self.blackjack_ratio_item, 1000, 750)
-                print("blackjack")
+                print("setting blackjack")
             else:
                 self.leave_choice()
-                print("leave")
+                print("setting leave")
         else:
             self.setting_state = self.setting_state_dict["choice"]
             stop_blink(self.window)

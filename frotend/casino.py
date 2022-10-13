@@ -56,17 +56,20 @@ class Casino:
 
         self.is_insurance = None
 
+        self.insurance_frame = None
         self.insurance_area = None
         self.insurance_question = None
         self.insurance_choice_yes = None
         self.insurance_choice_no = None
 
+        self.game_end_frame = None
         self.game_end_area = None
         self.game_end_question = None
         self.game_end_result = None
         self.game_end_continue = None
         self.game_end_quit = None
 
+        self.player_choice_frame = None
         self.player_choice_question = None
         self.player_choice_area = None
         self.player_option_result = None
@@ -132,6 +135,7 @@ class Casino:
 
         # Game start
         reset_result = self.game.reset()
+        print(reset_result)
         if reset_result[0]:
             self.game.deal_to_all()
 
@@ -147,7 +151,6 @@ class Casino:
             if self.is_ask_insurance:
                 self.ask_insurance()
             else:
-                self.game_state = "choice"
                 self.player_choice()
         else:
             self.game_state = "no money"
@@ -166,7 +169,6 @@ class Casino:
         self.game.players.leave_game()
         self.game.leave_and_money()
         if not game_end:
-            self.game_state = "choice"
             self.player_choice()
 
     # Ask Insurance
@@ -176,17 +178,19 @@ class Casino:
             self.game_state = "insurance"
             self.game_choice = self.game_choice_dict["insurance"]["yes"]
             self.is_insurance = True
+
+            # Create Area
             # for num in range(self.player_num):
             x1, y1, x2, y2 = self.players_area_xy[0]
             result = self.show_question(x1 - 130, y1, question="Buy insurance?", options=["Yes", "No"])
-            [frame, self.insurance_area, self.insurance_question,
+            [self.insurance_frame, self.insurance_area, self.insurance_question,
              [self.insurance_choice_yes, self.insurance_choice_no]] = result
         else:
-            self.game_state = "choice"
             self.player_choice()
 
     # Player Choice
     def player_choice(self):
+        self.game_state = "choice"
         self.game_choice = self.game_choice_dict["choice"]["double"]
         x1, y1, x2, y2 = self.players_area_xy[0]
         q_config = {"font": ("Arial", 14, "bold")}
@@ -194,12 +198,14 @@ class Casino:
                               "split": ["Split", self.player_choice_split],
                               "hit": ["Hit", self.player_choice_hit],
                               "stand": ["Stand", self.player_choice_stand]}
+
+        # Create Area
         player_option = []
         for option in self.game.get_player_option(self.game.get_players()[0], self.game.get_players()[0].hands[0]):
             player_option.append(player_option_dict[option][0])
         result = self.show_question(x1 - 145, y1 - 15, question="Your Choice:", q_config=q_config,
                                     options=player_option)
-        [frame, self.player_choice_area, self.player_choice_question,
+        [self.player_choice_frame, self.player_choice_area, self.player_choice_question,
          self.player_option_result] = result
 
     # Show Question Area
@@ -208,27 +214,34 @@ class Casino:
         if items:
 
             if type(items) != list:
-                items = Label(frame, text=items, fg="white", bg="black", font=CHOICE_FONT)
+                items_ = Label(frame, text=items, fg="white", bg="black", font=CHOICE_FONT)
                 if item_config:
-                    items.config(item_config)
-                    items.grid(column=0, row=row)
-                return items, row + 1
+                    items_.config(item_config)
+                items_.grid(column=0, row=row)
+                return items_, row + 1
             else:
                 item_array = []
                 temp_row = row
                 for num in range(len(items)):
                     if num == 0:
-                        item = Label(frame, text=items[num], fg="black", bg="white", font=CHOICE_FONT)
+                        items_ = Label(frame, text=items[num], fg="black", bg="white", font=CHOICE_FONT)
                     else:
-                        item = Label(frame, text=items[num], fg="white", bg="black", font=CHOICE_FONT)
+                        items_ = Label(frame, text=items[num], fg="white", bg="black", font=CHOICE_FONT)
                     if item_config and item_config[num]:
-                        item.config(item_config[num])
-                    item.grid(column=0, row=temp_row)
-                    item_array.append(item)
+                        items_.config(item_config[num])
+                    items_.grid(column=0, row=temp_row)
+                    item_array.append(items_)
                     temp_row += 1
                 return item_array, temp_row + 1
         return items, row
 
+    # Destroy Canvas OBJ
+    def destroy_obj(self, obj):
+        if obj:
+            print(2)
+            self.table_canvas.delete(obj)
+
+    # Show Question
     def show_question(self, x, y, question=None, q_config=None, game_result=None, r_config=None, options=None,
                       o_config=None):
 
@@ -260,6 +273,7 @@ class Casino:
             self.game_state = "game end"
             self.game_choice = self.game_choice_dict["end"]["continue"]
             self.show_game_end()
+        return game_result
 
     # Show Game End
     def show_hand_result(self):
@@ -295,13 +309,14 @@ class Casino:
             game_result = self.show_hand_result()
             options = ["Continue", "Quit"]
 
+        # Create Area
         result = self.show_question(x, y, question=f"Game End", q_config=q_config,
                                     game_result=f"Result: {game_result}\n", r_config=r_config,
                                     options=options, o_config=o_config)
         if self.game_state == "no money":
-            [frame, self.game_end_area, self.game_end_question, self.game_end_result, [self.game_end_quit]] = result
+            [self.game_end_frame, self.game_end_area, self.game_end_question, self.game_end_result, [self.game_end_quit]] = result
         else:
-            [frame, self.game_end_area, self.game_end_question, self.game_end_result,
+            [self.game_end_frame, self.game_end_area, self.game_end_question, self.game_end_result,
              [self.game_end_continue, self.game_end_quit]] = result
 
     # Show Card
@@ -429,7 +444,8 @@ class Casino:
     def enterKey(self, event):
         if self.game_state == "insurance":
             self.game.ask_insurance(self.is_insurance)
-            self.table_canvas.delete(self.insurance_area)
+            # Destroy previous Area
+            self.destroy_obj(self.insurance_area)
             self.game_state = "blackjack"
             self.check_blackjack()
         elif self.game_state == "choice":
@@ -438,17 +454,21 @@ class Casino:
                 self.update_money(self.game.get_players()[0])
                 self.update_stake(self.game.get_players()[0])
                 self.show_players_card()
-                self.check_player_end()
             elif self.game_choice == self.game_choice_dict["choice"]["split"]:
                 pass
             elif self.game_choice == self.game_choice_dict["choice"]["hit"]:
                 pass
             elif self.game_choice == self.game_choice_dict["choice"]["stand"]:
                 pass
+            if not self.check_player_end():
+                self.player_choice()
+                self.destroy_obj(self.player_choice_area)
         elif self.game_state == "game end":
             if self.game_choice == self.game_choice_dict["end"]["continue"]:
                 self.game_start()
-                self.table_canvas.delete(self.game_end_area)
+                # Destroy previous Area
+                self.destroy_obj(self.game_end_area)
+                print(1)
             elif self.game_choice == self.game_choice_dict["end"]["quit"]:
                 self.table_canvas.delete("all")
                 welcome_ = welcome.Welcome(self.game, self.window, self.table_canvas, self.window_width,

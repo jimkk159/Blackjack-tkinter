@@ -120,13 +120,13 @@ class Welcome:
     def enterKey(self, event):
 
         if self.welcome_state == 0:
-            print("start")
+            print("welcome start")
             self.start_choice()
         elif self.welcome_state == 1:
-            print("setting")
+            print("welcome setting")
             self.setting_choice()
         else:
-            print("quit")
+            print("welcome quit")
             self.quit_choice()
         print("Enter key pressed")
 
