@@ -97,7 +97,7 @@ class Players:
                     player.basic_stake = player.money
                     print("All in")
 
-                if player.basic_stake < min_bet:
+                elif player.basic_stake < min_bet:
                     print(f"At least {min_bet} dollar")
                     continue
                 break

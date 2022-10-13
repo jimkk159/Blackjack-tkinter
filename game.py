@@ -197,7 +197,6 @@ class Blackjack:
     def player_choice(self, player):
 
         if not player.fold:
-
             print()
             choice = input(f"Player {player.id} choice?")
             if choice == "double" and self.get_player_can_double(player):
