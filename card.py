@@ -1,4 +1,5 @@
 import random
+
 suits = ["spade", "heart", "diamond", "club"]
 poker_symbol = ["A", "K", "Q", "J", "10", "9", "8", "7", "6", "5", "4", "3", "2"]
 poker_value_dict = {"A": 11, "K": 10, "Q": 10, "J": 10, "10": 10, "9": 9, "8": 8, "7": 7, "6": 6, "5": 5,
@@ -14,22 +15,59 @@ class Card:
         self.value = poker_value_dict[symbol]
         self.faced = faced
 
+    # GET
+    def get_symbol(self):
+        return self.symbol
+
+    def get_suit(self):
+        return self.suit
+
+    def get_value(self):
+        return self.value
+
+    def get_faced(self):
+        return self.faced
+
+    # SET
+    def set_value(self, value):
+        self.value = value
+
+    def set_faced(self, faced):
+        self.faced = faced
+
+
 class Deck:
 
     def __init__(self, deck_num):
         self.deck_num = deck_num
-        self.deck = self.create_muti_deck(self.deck_num)
+        self.deck = self.get_multi_new_deck(self.deck_num)
 
-    def create_single_deck(self):
+    # GET
+    def get_cards_num(self):
+        return len(self.deck)
+
+    def get_deck_num(self):
+        return self.deck_num
+
+    def get_deck(self):
+        return self.deck
+
+    def get_cards_enough(self):
+
+        if len(self.deck) <= self.deck_num * 52 / 2:
+            return True
+        return False
+
+    def get_new_deck(self):
         return [Card(symbol, suit) for symbol in poker_symbol for suit in suits]
 
-    def create_muti_deck(self, deck_num):
+    def get_multi_new_deck(self, deck_num):
         deck = []
         for _ in range(deck_num):
-            deck += [Card(symbol, suit) for symbol in poker_symbol for suit in suits]
+            deck += self.get_new_deck()
         return deck
 
-    def print_deck(self):
+    def get_print_deck(self):
 
         count = 0
         for card in self.deck:
@@ -40,16 +78,13 @@ class Deck:
                 print()
                 count = 0
 
+    # Set
     def shuffle(self):
         random.shuffle(self.deck)
 
     def reset_deck(self):
-
-        self.deck = self.create_muti_deck(self.deck_num)
+        self.deck = self.get_multi_new_deck(self.deck_num)
         self.shuffle()
 
-    def check_deck_num(self):
 
-        if len(self.deck) <= self.deck_num * 52 / 2:
-            return True
-        return False
+

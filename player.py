@@ -7,6 +7,26 @@ class Hand:
         self._5_card_charlie = False
         self.result = ""
 
+    def get_cards(self):
+        return self.cards
+
+    def get_is_ace_split(self):
+        return self.is_ace_split
+
+    def get_is_charlie(self):
+        return self._5_card_charlie
+
+    def get_result(self):
+        return self.result
+
+    def set_is_ace_split(self, is_ace_split: bool):
+        self.is_ace_split = is_ace_split
+
+    def set_result(self, result):
+        self.result = result
+
+    def set_charlie(self, charlie):
+        self._5_card_charlie = charlie
 
 class Player:
 
@@ -20,36 +40,83 @@ class Player:
         self.double = False
         self.insurance = False
 
-    def print_cards(self):
+    # GET
+    def get_id(self):
+        return self.id
+
+    def get_money(self):
+        return self.money
+
+    def get_basic_stake(self):
+        return self.basic_stake
+
+    def get_total_stake(self):
+        return self.total_stake
+
+    def get_hands(self):
+        return self.hands
+
+    def get_fold(self):
+        return self.fold
+
+    def get_double(self):
+        return self.double
+
+    def get_insurance(self):
+        return self.insurance
+
+    def get_print_cards(self):
         print(f"Player {self.id}:")
         for hand in self.hands:
             for card in hand.cards:
-                print(f"{card.symbol} {card.suit} ", end="")
+                print(f"{card.get_symbol()} {card.get_suit()} ", end="")
             print(" | ", end="")
         print()
 
-    def print_money(self):
+    def get_print_money(self):
         print(f"Player {self.id} has {self.money}")
 
-    def print_result(self):
+    def get_print_result(self):
         print(f"Player {self.id} result is", end="")
         for hand in self.hands:
-            print(f" {hand.result}", end="")
+            print(f" {hand.get_result()}", end="")
         print()
 
-    def print_status(self):
+    def get_print_status(self):
         print(f"Player {self.id} has:")
         print(f"money: {self.money} ")
         print(f"stake: {self.basic_stake} ")
         print(f"cards: ", end="")
         for hand in self.hands:
             for card in hand.cards:
-                print(f"{card.symbol} {card.suit} ", end="")
+                print(f"{card.get_symbol()} {card.get_suit()} ", end="")
             print(" | ", end="")
         print()
 
-    def get_hands(self):
-        return self.hands
+    # GET
+    def set_money(self, money: int):
+        self.money = money
+
+    def add_money(self, stake: int):
+        self.money += stake
+
+    def set_basic_stake(self, stake: int):
+        self.basic_stake = stake
+
+    def set_total_stake(self, stake: int):
+        self.total_stake = stake
+
+    def add_total_stake(self, stake: int):
+        self.total_stake += stake
+
+    def set_fold(self, fold: bool):
+        self.fold = fold
+
+    def set_double(self, double: bool):
+        self.double = double
+
+    def set_insurance(self, insurance: bool):
+        self.insurance = insurance
 
 
 class Players:
@@ -58,6 +125,31 @@ class Players:
         self.player_num = player_num
         self.in_ = self.create(self.player_num)
         self.out = []
+
+    # GET
+    # Get All Players Hands
+    def get_all_hands(self):
+
+        all_hands = []
+        for player in self.in_:
+            all_hands.append(player.get_hands())
+        return all_hands
+
+    # Get All Players inside table
+    def get_players_in(self):
+        return self.in_
+
+    # Get All Players outside table
+    def get_players_out(self):
+        return self.out
+
+    # SET
+    # Set stake
+    def set_stake(self):
+
+        for player in self.in_:
+            basic_stake = player.get_basic_stake()
+            player.set_total_stake(basic_stake)
 
     # Create Player
     def create(self, player_num):
@@ -68,10 +160,10 @@ class Players:
         return in_game
 
     # Reset Player
-    def reset_all(self, min_bet):
+    def reset_all(self):
 
         self.enter()
-        self.set_stake(min_bet)
+        self.set_stake()
         result = self.pay_stake()
         self.reset_double()
         self.reset_fold()
@@ -86,31 +178,23 @@ class Players:
             self.in_.append(self.out.pop())
         self.in_.sort(key=lambda x: x.id)
 
-    # Set stake
-    def set_stake(self, min_bet):
-
-        for player in self.in_:
-
-            # while True:
-                # player.stake = int(input("How much money do you want to bet?"))
-            player.total_stake = player.basic_stake
-                # # Check Player stake
-                # if player.basic_stake >= player.money:
-                #     player.basic_stake = player.money
-                #     print("All in")
-                #
-                # elif player.basic_stake < min_bet:
-                #     print(f"At least {min_bet} dollar")
-                #     continue
-                # break
-
     # Pay Stake
     def pay_stake(self):
+
+        result = self.is_pay_stake()
+        for num in range(len(result)):
+            if result[num]:
+                player = self.in_[num]
+                basic_stake = player.get_basic_stake()
+                self.in_[num].add_money(-basic_stake)
+        return result  # Have paid
+
+    # Able to Pay Stake
+    def is_pay_stake(self):
 
         result = []
         for player in self.in_:
             if player.money > player.basic_stake:
-                player.money -= player.basic_stake
                 result.append(True)
             else:
                 result.append(False)
@@ -134,12 +218,6 @@ class Players:
         for player in self.in_:
             player.insurance = False
 
-    # Reset 5 Card Charlie
-    def reset_charlie(self):
-
-        for player in self.in_:
-            player._5_card_charlie = False
-
     # Reset Cards in hand
     def reset_hands(self):
 
@@ -148,13 +226,11 @@ class Players:
             player.hands = [Hand()]
 
     # People who win or lose
-    def leave_game(self):
+    def leave_table(self):
 
         out_game = []
-        # out_game = filter(lambda x: x.result != "")
         for player in self.in_:
-
-            if not any(map(lambda x: x.result == "", player.hands)):
+            if not any(map(lambda x: x.result == "", player.get_hands())):
                 out_game.append(player.id)
 
         while out_game:
@@ -171,38 +247,23 @@ class Players:
     def print_all_cards(self):
 
         for player in self.in_:
-            player.print_cards()
+            player.get_print_cards()
 
     # Print Players Moneys
     def print_all_money(self):
 
         for player in self.in_:
-            player.print_money()
+            player.get_print_money()
 
     # Print Players Status
     def print_all_status(self, choice="in"):
 
-        array = self.in_
-        if choice == "out":
-            array = self.out
-
+        array = self.in_ if choice == "in" else self.out
         for player in array:
-            player.print_status()
+            player.get_print_status()
 
     # Print Players Result
     def print_all_result(self):
 
         for player in self.out:
-            player.print_result()
-
-    def get_all_hands(self):
-
-        array = self.in_
-        all_hands = []
-        for player in array:
-            all_hands.append(player.get_hands())
-        return all_hands
-
-    def get_all_players(self):
-
-        return self.in_
+            player.get_print_result()

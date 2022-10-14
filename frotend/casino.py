@@ -137,7 +137,7 @@ class Casino:
 
     # Check Blackjack
     def check_blackjack(self):
-        if self.game.check_cards_blackjack(self.game.banker):
+        if self.game.get_is_blackjack(self.game.banker):
             self.game.banker[0].faced = True
             self.show_banker_card()
         game_end = self.game.check_blackjack()
@@ -153,8 +153,8 @@ class Casino:
         if game_end:
             self.update_money(self.game.get_players()[0])
             self.update_stake(self.game.get_players()[0])
-        self.game.players.leave_game()
-        self.game.leave_and_money()
+        self.game.players.leave_table()
+        self.game.give_money_all()
         return game_end
 
     # Ask Insurance
@@ -288,9 +288,11 @@ class Casino:
         return game_result
 
     def show_game_end(self):
+
         q_config = {"font": ("Arial", 30, "bold")}
         r_config = {"font": ("Arial", 18, "bold")}
         o_config = [{"font": ("Arial", 18, "bold")}, {"font": ("Arial", 18, "bold")}]
+
         if self.game_state == "no money":
             x = 243
             y = 130
@@ -403,8 +405,10 @@ class Casino:
         self.game.reveal_banker_card()
         self.game.deal_to_banker()
         self.show_banker_card()
-        if self.game.is_banker_bust():
+        if self.game.get_is_banker_bust():
             self.game.banker_bust_process()
+        else:
+            pass
 
     # Keyboard
     def upKey(self, event):
@@ -465,8 +469,8 @@ class Casino:
             elif game_choice_ == "hit":
                 # ToDo Only Player 1
                 self.game.hit_process(self.game.get_players()[0])
-                print(self.game.check_sum_switch_ace(self.game.get_players()[0].hands[0].cards))
-                print(self.game.check_sum_switch_ace(self.game.get_players()[0].hands[0].cards))
+                print(self.game.get_hand_sum_switch_ace(self.game.get_players()[0].hands[0].cards))
+                print(self.game.get_hand_sum_switch_ace(self.game.get_players()[0].hands[0].cards))
                 self.show_players_card()
                 self.destroy_obj(self.game_interface_dict["choice"]["area"])
                 if self.check_game_end():
