@@ -327,9 +327,10 @@ class Casino:
         cards = self.game.banker
         for card_num in range(len(cards)):
             card = cards[card_num]
+            card_spce = 48 if card_num != 0 else 0
             card_loc = 14 * self.img_suit_dict[card.suit] + self.img_symbol_dict[card.symbol]
             self.banker_img.append(
-                self.show_card(325 + 68 * card_num + CARD_HORIZONTAL_MODIFY, 30, card_loc, card.faced))
+                self.show_card(325 + card_spce + 20 * card_num + CARD_HORIZONTAL_MODIFY, 30, card_loc, card.faced))
 
     def show_players_card(self):
 
