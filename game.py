@@ -35,7 +35,7 @@ class Blackjack:
     def start(self):
 
         # self.banker = [Card(symbol='K', suit='spade'),
-        #                Card(symbol='A', suit='heart')]
+        #                Card(symbol='5', suit='heart')]
         # self.players.in_[0].hands[0].cards = [Card(symbol='A', suit='spade'),
         #                                       Card(symbol='A', suit='heart')]
         if self.is_insurance:
@@ -381,8 +381,6 @@ class Blackjack:
             for hand in player.get_hands():
                 if hand.get_result() == "":
                     hand.set_result("win")
-        self.players.leave_table()
-        self.give_money_all()
 
     # Compare the card score in hand
     def compare_cards(self):
@@ -410,16 +408,16 @@ class Blackjack:
 
             if hand.get_is_charlie() or player.get_double():
 
-                player.add_money(4 * player.basic_stake())
+                player.add_money(4 * player.get_basic_stake())
 
             else:
 
-                player.add_money(2 * player.basic_stake())
+                player.add_money(2 * player.get_basic_stake())
 
         if hand.get_result() == "blackjack":
 
             if player.get_double():
-                player.add_money(2 * (1 + self.blackjack_ratio) * player.basic_stake())
+                player.add_money(2 * (1 + self.blackjack_ratio) * player.get_basic_stake())
 
             elif hand.get_is_charlie():
                 player.money.add_money(floor((1 + 3 * self.blackjack_ratio) * player.get_basic_stake()))

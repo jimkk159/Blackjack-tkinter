@@ -118,7 +118,8 @@ class Casino:
             self.game.deal_to_all()
 
             # self.game.banker = [Card(symbol='K', suit='spade', faced=False),
-            #                     Card(symbol='A', suit='heart')]
+            #                     Card(symbol='6', suit='heart'),
+            #                     Card(symbol='6', suit='heart')]
             # self.game.get_players()[0].hands[0].cards = [Card(symbol='A', suit='spade'),
             #                                              Card(symbol='A', suit='heart'),
             #                                              Card(symbol='A', suit='club')]
@@ -195,7 +196,7 @@ class Casino:
         for option in options:
             player_option.append(player_option_dict[option])
 
-        result = self.show_question(x1 - 145, y1 - 15, question="Your Choice:", q_config=q_config,
+        result = self.show_question(x1 - 143, y1 - 15, question="Your Choice:", q_config=q_config,
                                     options=player_option, o_index=options)
         self.game_interface_dict[self.game_state] = result
 
@@ -309,6 +310,7 @@ class Casino:
         result = self.show_question(x, y, question=f"Game End", q_config=q_config,
                                     game_result=f"Result: {game_result}", r_config=r_config,
                                     options=options, o_index=["continue", "quit"], o_config=o_config)
+
         self.game_interface_dict[self.game_state] = result
 
     # Show Card
@@ -408,9 +410,9 @@ class Casino:
         self.show_banker_card()
         if self.game.get_is_banker_bust():
             self.game.banker_bust_process()
-            self.game_state = "end"
         else:
-            pass
+            self.game.compare_cards()
+        self.game_end_process()
 
     # Keyboard
     def upKey(self, event):
@@ -471,8 +473,8 @@ class Casino:
             elif game_choice_ == "hit":
                 # ToDo Only Player 1
                 self.game.hit_process(self.game.get_players()[0])
-                print(self.game.get_hand_sum_switch_ace(self.game.get_players()[0].hands[0].cards))
-                print(self.game.get_hand_sum_switch_ace(self.game.get_players()[0].hands[0].cards))
+                # print(self.game.get_hand_sum_switch_ace(self.game.get_players()[0].hands[0].cards))
+                # print(self.game.get_hand_sum_switch_ace(self.game.get_players()[0].hands[0].cards))
                 self.show_players_card()
                 self.destroy_obj(self.game_interface_dict["choice"]["area"])
                 if self.is_player_end():
@@ -490,7 +492,6 @@ class Casino:
                 # Destroy previous Area
                 self.destroy_obj(self.game_interface_dict["end"]["area"])
                 self.game_start()
-
             elif game_choice_ == "quit":
                 self.table_canvas.delete("all")
                 welcome_ = welcome.Welcome(self.game, self.window, self.table_canvas, self.window_width,

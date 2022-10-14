@@ -15,6 +15,9 @@ class Frontend:
 
     def __init__(self):
         self.window = Tk()
+        self.window.maxsize(840, 440)
+        self.window.resizable(False, False)
+        self.window.state('zoomed')
         self.window.title("Jim's Blackjack Game")
         self.window.minsize(width=WINDOW_WIDTH, height=WINDOW_HEIGHT)
         self.window.config(padx=PADDING, pady=PADDING, bg="black")
@@ -29,5 +32,6 @@ class Frontend:
         welcome = Welcome(game, self.window, self.canvas, WINDOW_WIDTH, WINDOW_HEIGHT, PADDING)
         # setting = Setting(self.window, self.canvas, WINDOW_WIDTH, WINDOW_HEIGHT, PADDING)
         self.window.mainloop()
+
 
 frontend = Frontend()
