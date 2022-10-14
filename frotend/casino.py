@@ -119,9 +119,9 @@ class Casino:
 
             # self.game.banker = [Card(symbol='K', suit='spade', faced=False),
             #                     Card(symbol='A', suit='heart')]
-            self.game.get_players()[0].hands[0].cards = [Card(symbol='A', suit='spade'),
-                                                         Card(symbol='A', suit='heart'),
-                                                         Card(symbol='A', suit='club')]
+            # self.game.get_players()[0].hands[0].cards = [Card(symbol='A', suit='spade'),
+            #                                              Card(symbol='A', suit='heart'),
+            #                                              Card(symbol='A', suit='club')]
             self.game_state = "insurance"
             self.show_banker_card()
             self.show_players_card()
@@ -397,6 +397,14 @@ class Casino:
         choices[now_choice][0].config(fg="black", bg="white")
         return now_choice
 
+    # banker time
+    def banker_time(self):
+        self.game.reveal_banker_card()
+        self.game.deal_to_banker()
+        self.show_banker_card()
+        if self.game.is_banker_bust():
+            self.game.banker_bust_process()
+
     # Keyboard
     def upKey(self, event):
         if self.game_state == "insurance":
@@ -449,6 +457,8 @@ class Casino:
                     self.game_state = "end"
                 else:
                     self.game_state = "banker"
+                    self.banker_time()
+
             elif game_choice_ == "split":
                 pass
             elif game_choice_ == "hit":
@@ -465,6 +475,7 @@ class Casino:
             elif game_choice_ == "stand":
                 self.destroy_obj(self.game_interface_dict["choice"]["area"])
                 self.game_state = "banker"
+                self.banker_time()
 
         elif self.game_state == "end":
             game_choice_ = self.game_interface_dict[self.game_state]["options"][self.game_choice][1]

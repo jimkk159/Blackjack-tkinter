@@ -279,24 +279,28 @@ class Blackjack:
             hand._5_card_charlie = True
 
     # It's banker time
-    def banker_time(self):
+    def reveal_banker_card(self):
+        self.banker[0].faced = True
+
+    def deal_to_banker(self):
 
         while self.check_sum_switch_ace(self.banker) < 17:
             self.deal(self.banker)
-            self.banker_bust()
 
-    def banker_bust(self):
+    def is_banker_bust(self):
 
         if self.get_is_hand_bust(self.banker):
-            for player in self.players.in_:
-                for hand in player.hands:
-                    if hand.result == "":
-                        hand.result = "win"
-
-            self.players.leave_game()
-            self.leave_and_money()
             return True
         return False
+
+    def banker_bust_process(self):
+
+        for player in self.players.in_:
+            for hand in player.hands:
+                if hand.result == "":
+                    hand.result = "win"
+        self.players.leave_game()
+        self.leave_and_money()
 
     # Compare the card score in hand
     def compare_cards(self):
