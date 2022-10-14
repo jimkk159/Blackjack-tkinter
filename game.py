@@ -356,15 +356,36 @@ class Blackjack:
 
     # Hit
     def hit(self, hand):
-
-        self.deal(hand.cards)
+        self.deal(hand.get_cards())
         if len(hand.cards) >= 5:
             hand.set_charlie(True)
 
     def hit_process(self, player):
-        self.deal(player.get_hands()[0].get_cards())
+        self.hit(player.get_hands()[0])
         if self.get_is_hand_bust(player.get_hands()[0].get_cards()):
             player.get_hands()[0].set_result("lose")
+
+    # Split
+    def split(self, player, hand):
+
+        # Separate the card
+        split_card = hand.get_cards().pop()
+        hand.set_is_ace_split(True)
+
+        # Create New Hand
+        split_hand = Hand()
+        split_hand.get_cards().append(split_card)
+        split_hand.set_is_ace_split(True)
+
+        # Assign the hand to player
+        player.get_hands().append(split_hand)
+
+    def split_process(self, player, hand):
+
+        player.add_money(-player.get_basic_stake())
+        player.add_total_stake(player.get_basic_stake())
+        self.split(player, hand)
+
 
     # It's banker time
     def reveal_banker_card(self):

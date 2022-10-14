@@ -120,9 +120,8 @@ class Casino:
             # self.game.banker = [Card(symbol='K', suit='spade', faced=False),
             #                     Card(symbol='6', suit='heart'),
             #                     Card(symbol='6', suit='heart')]
-            # self.game.get_players()[0].hands[0].cards = [Card(symbol='A', suit='spade'),
-            #                                              Card(symbol='A', suit='heart'),
-            #                                              Card(symbol='A', suit='club')]
+            self.game.get_players()[0].hands[0].cards = [Card(symbol='A', suit='spade'),
+                                                         Card(symbol='A', suit='heart')]
             self.game_state = "insurance"
             self.show_banker_card()
             self.show_players_card()
@@ -469,12 +468,14 @@ class Casino:
                     self.banker_time()
 
             elif game_choice_ == "split":
-                pass
+                # ToDo Only Player 1 Hand 1
+                self.game.split_process(self.game.get_players()[0], self.game.get_players()[0].hands[0])
+                self.show_players_card()
+                self.destroy_obj(self.game_interface_dict["choice"]["area"])
+
             elif game_choice_ == "hit":
                 # ToDo Only Player 1
                 self.game.hit_process(self.game.get_players()[0])
-                # print(self.game.get_hand_sum_switch_ace(self.game.get_players()[0].hands[0].cards))
-                # print(self.game.get_hand_sum_switch_ace(self.game.get_players()[0].hands[0].cards))
                 self.show_players_card()
                 self.destroy_obj(self.game_interface_dict["choice"]["area"])
                 if self.is_player_end():
