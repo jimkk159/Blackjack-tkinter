@@ -377,7 +377,7 @@ class Blackjack:
 
     def banker_bust_process(self):
 
-        for player in self.players.in_:
+        for player in self.players.get_players_in():
             for hand in player.get_hands():
                 if hand.get_result() == "":
                     hand.set_result("win")

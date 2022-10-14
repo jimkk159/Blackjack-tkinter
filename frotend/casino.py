@@ -141,21 +141,20 @@ class Casino:
             self.game.banker[0].faced = True
             self.show_banker_card()
         game_end = self.game.check_blackjack()
-        game_end = self.check_game_end()
+        game_end = self.is_player_end()
         if not game_end:
             self.player_choice()
 
     # End Process
-    def check_game_end(self):
+    def game_end_process(self):
 
         # ToDo only care player 1 win or lose now
-        game_end = self.check_player_end()
+        game_end = self.is_player_end()
         if game_end:
             self.update_money(self.game.get_players()[0])
             self.update_stake(self.game.get_players()[0])
         self.game.players.leave_table()
         self.game.give_money_all()
-        return game_end
 
     # Ask Insurance
     def ask_insurance(self):
@@ -257,11 +256,13 @@ class Casino:
         return result
 
     # Check Player State
-    def check_player_end(self):
+    def is_player_end(self):
 
+        game_result = False
         # TODO only check player 1 now
         hands = self.game.get_players()[0].hands
-        game_result = all([(True if hand.result != "" else False) for hand in hands])
+        if hands:
+            game_result = all([(True if hand.result != "" else False) for hand in hands])
         if game_result:
             self.game_state = "end"
             self.game_choice = 0
@@ -407,6 +408,7 @@ class Casino:
         self.show_banker_card()
         if self.game.get_is_banker_bust():
             self.game.banker_bust_process()
+            self.game_state = "end"
         else:
             pass
 
@@ -458,7 +460,7 @@ class Casino:
                 self.game.double_down_process(self.game.get_players()[0])
                 self.show_players_card()
                 self.destroy_obj(self.game_interface_dict["choice"]["area"])
-                if self.check_game_end():
+                if self.is_player_end():
                     self.game_state = "end"
                 else:
                     self.game_state = "banker"
@@ -473,7 +475,7 @@ class Casino:
                 print(self.game.get_hand_sum_switch_ace(self.game.get_players()[0].hands[0].cards))
                 self.show_players_card()
                 self.destroy_obj(self.game_interface_dict["choice"]["area"])
-                if self.check_game_end():
+                if self.is_player_end():
                     self.game_state = "end"
                 else:
                     self.player_choice()
