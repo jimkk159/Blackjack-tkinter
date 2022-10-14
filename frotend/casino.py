@@ -277,7 +277,7 @@ class Casino:
         hands = self.game.get_players()[0].hands
         for num in range(len(hands)):
             if num != 0:
-                game_result += " "
+                game_result += ", "
             if hands[num].result == "push":
                 game_result += "PUSH"
             elif hands[num].result == "blackjack":
@@ -352,6 +352,7 @@ class Casino:
                 for cards_img in self.players_img[player_num]:
                     self.delete_imgs(cards_img)
                 self.players_img[player_num] = []
+
         # Create a list to save specific player img
         while len(self.players_img) <= player_num:
             self.players_img.append([])
@@ -369,7 +370,7 @@ class Casino:
             for card_num in range(len(cards)):
                 card = cards[card_num]
                 card_loc = 14 * self.img_suit_dict[card.suit] + self.img_symbol_dict[card.symbol]
-                card_img = self.show_card(x + 20 * card_num + CARD_HORIZONTAL_MODIFY, y, card_loc, card.faced)
+                card_img = self.show_card(x + 20 * card_num + CARD_HORIZONTAL_MODIFY, y + 40 * hand_num, card_loc, card.faced)
                 self.players_img[player_num][hand_num].append(card_img)
 
     def delete_imgs(self, imgs):
@@ -472,16 +473,19 @@ class Casino:
                 self.game.split_process(self.game.get_players()[0], self.game.get_players()[0].hands[0])
                 self.show_players_card()
                 self.destroy_obj(self.game_interface_dict["choice"]["area"])
+                self.player_choice()
 
             elif game_choice_ == "hit":
                 # ToDo Only Player 1
                 self.game.hit_process(self.game.get_players()[0])
                 self.show_players_card()
                 self.destroy_obj(self.game_interface_dict["choice"]["area"])
+                print(self.is_player_end())
                 if self.is_player_end():
                     self.game_state = "end"
                 else:
                     self.player_choice()
+
             elif game_choice_ == "stand":
                 self.destroy_obj(self.game_interface_dict["choice"]["area"])
                 self.game_state = "banker"

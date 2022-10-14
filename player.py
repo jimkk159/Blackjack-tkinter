@@ -56,6 +56,9 @@ class Player:
     def get_hands(self):
         return self.hands
 
+    def get_hands_num(self):
+        return len(self.hands)
+
     def get_fold(self):
         return self.fold
 

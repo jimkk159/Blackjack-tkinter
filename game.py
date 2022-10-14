@@ -78,8 +78,9 @@ class Blackjack:
         return self.is_insurance_over_10
 
     def get_player_can_double(self, player):
-        if len(player.get_hands()[
-                   0].get_cards()) == 2 and player.get_money() >= player.get_basic_stake() and self.is_double:
+        if len(player.get_hands()[0].get_cards()) == 2 and \
+                player.get_money() >= player.get_basic_stake() and \
+                self.is_double and player.get_hands_num() == 1:
             return True
         return False
 
