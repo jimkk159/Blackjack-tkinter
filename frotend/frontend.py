@@ -1,9 +1,11 @@
 from tkinter import *
+import pygame
 
 # self module
 from welcome import Welcome
 from game import Blackjack
-from setting import Setting
+
+pygame.mixer.init()
 
 WINDOW_WIDTH = 800
 WINDOW_HEIGHT = 400
@@ -25,8 +27,13 @@ class Frontend:
         # Game Icon
         self.window.iconbitmap("../icon/poker-cards.ico")
 
+        # Music
+        pygame.mixer.music.load("../music/Chris Bell & 100 Blues - Cold-Hearted Woman.mp3")
+        pygame.mixer.music.set_volume(0.1)
+        pygame.mixer.music.play()
         game = Blackjack()
 
+        print(pygame.mixer.music.get_volume())
         self.canvas = Canvas(self.window, bg="black", width=WINDOW_WIDTH, height=WINDOW_HEIGHT,
                              highlightthickness=0)
         welcome = Welcome(game, self.window, self.canvas, WINDOW_WIDTH, WINDOW_HEIGHT, PADDING)
