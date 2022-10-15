@@ -34,32 +34,9 @@ class Blackjack:
 
     def start(self):
 
-        # self.banker = [Card(symbol='K', suit='spade'),
-        #                Card(symbol='5', suit='heart')]
-        # self.players.in_[0].hands[0].cards = [Card(symbol='A', suit='spade'),
-        #                                       Card(symbol='A', suit='heart')]
         if self.is_insurance:
             self.ask_insurance()
         self.check_blackjack()
-
-        # self.choice()
-        # self.players.leave_game()
-        # self.leave_and_money()
-
-        # self.banker_time()
-        # if not self.check_bust(self.banker):
-        #     self.compare_cards()
-        #     self.players.leave_game()
-        #     self.leave_and_money()
-        #
-        # self.print_banker()
-        # self.players.print_all_status(choice="out")
-        # print()
-        # self.players.print_all_result()
-        # print(self.check_sum_switch_ace(self.players.out[0].hands[0].cards))
-        # print("*" * 20)
-        # if input("Continue?") == "n":
-        #     self.game_end = False
 
     # GET
     def get_deck_num(self):
@@ -110,6 +87,9 @@ class Blackjack:
         return self.players.get_all_hands()
 
     def get_players(self):
+        return self.players
+
+    def get_players_in(self):
         return self.players.get_players_in()
 
     def get_player_option(self, player, hand):
@@ -283,7 +263,7 @@ class Blackjack:
 
         for player in self.players.get_players_in():
             self.player_choice(player)
-        self.players.leave_table()
+        self.players.eliminate()
         self.give_money_all()
 
     def fold(self, player):
@@ -361,13 +341,13 @@ class Blackjack:
         if len(hand.cards) >= 5:
             hand.set_charlie(True)
 
-    def hit_process(self, player):
-        self.hit(player.get_hands()[0])
-        if self.get_is_hand_bust(player.get_hands()[0].get_cards()):
-            player.get_hands()[0].set_result("lose")
+    def hit_process(self, hand):
+        self.hit(hand)
+        if self.get_is_hand_bust(hand.get_cards()):
+            hand.set_result("lose")
 
     # Split
-    def split(self, player, hand):
+    def split(self, hands, hand):
 
         # Separate the card
         split_card = hand.get_cards().pop()
@@ -379,13 +359,13 @@ class Blackjack:
         split_hand.set_is_ace_split(True)
 
         # Assign the hand to player
-        player.get_hands().append(split_hand)
+        hands.append(split_hand)
 
     def split_process(self, player, hand):
 
         player.add_money(-player.get_basic_stake())
         player.add_total_stake(player.get_basic_stake())
-        self.split(player, hand)
+        self.split(player.get_hands(), hand)
 
 
     # It's banker time
@@ -401,7 +381,8 @@ class Blackjack:
 
         for player in self.players.get_players_in():
             for hand in player.get_hands():
-                if hand.get_result() == "":
+                hand_result = hand.get_result()
+                if hand_result == "" or hand_result == "stand":
                     hand.set_result("win")
 
     # Compare the card score in hand
@@ -410,7 +391,8 @@ class Blackjack:
         banker_point = self.get_hand_sum_switch_ace(self.banker)
         for player in self.players.get_players_in():
             for hand in player.get_hands():
-                if hand.get_result() == "":
+                hand_result = hand.get_result()
+                if hand_result == "" or hand_result == "stand":
 
                     if hand.get_is_charlie():
                         hand.set_result("win")

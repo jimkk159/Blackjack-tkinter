@@ -229,7 +229,7 @@ class Players:
             player.hands = [Hand()]
 
     # People who win or lose
-    def leave_table(self):
+    def eliminate(self):
 
         out_game = []
         for player in self.in_:

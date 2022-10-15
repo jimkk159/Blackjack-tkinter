@@ -14,6 +14,9 @@ IMG_VERTICAL_SPACE = 94
 IMG_HORIZONTAL_INTERVAL = 2
 IMG_VERTICAL_INTERVAL = 2
 
+IMG_HAND_CARD_SPACE = 40
+IMG_HAND_CHOICE_SPACE = 60
+
 CARD_HORIZONTAL_MODIFY = -10
 
 
@@ -35,7 +38,7 @@ class Casino:
         self.is_over_ten = self.game.get_insurance_over_10()
         self.is_double = self.game.get_is_double()
         self.blackjack_ratio = self.game.get_blackjack_ratio()
-        self.players = self.game.get_players()
+        self.players = self.game.get_players_in()
 
         # Interface Attribute
         self.window = window
@@ -56,6 +59,7 @@ class Casino:
         self.game_choice = 0
 
         self.is_insurance = None
+        self.now_player = self.game.get_players_in()[0]
 
         self.banker_img = []
         self.players_img = []
@@ -103,9 +107,9 @@ class Casino:
             self.players_area_xy.append((120, 230, 220, 310))
             self.players_area_xy.append((350, 260, 450, 340))
             self.players_area_xy.append((580, 230, 680, 310))
-        self.money = self.table_canvas.create_text(10, 10, text=f"Money: {self.game.get_players()[0].money}",
+        self.money = self.table_canvas.create_text(10, 10, text=f"Money: {self.now_player.get_money()}",
                                                    font=PLAYER_STATE_FONT, anchor="nw", fill="black")
-        self.stake = self.table_canvas.create_text(10, 50, text=f"Stake: {self.game.get_players()[0].basic_stake}",
+        self.stake = self.table_canvas.create_text(10, 50, text=f"Stake: {self.now_player.get_basic_stake()}",
                                                    font=PLAYER_STATE_FONT, anchor="nw", fill="black")
         self.control_casino()
         self.game_start()
@@ -117,20 +121,20 @@ class Casino:
         if reset_result[0]:
             self.game.deal_to_all()
 
+            # For Debug Test
             # self.game.banker = [Card(symbol='K', suit='spade', faced=False),
-            #                     Card(symbol='6', suit='heart'),
-            #                     Card(symbol='6', suit='heart')]
-            self.game.get_players()[0].hands[0].cards = [Card(symbol='A', suit='spade'),
-                                                         Card(symbol='A', suit='heart')]
+            #                     Card(symbol='A', suit='heart')]
+            # self.now_player.get_hands()[0].cards = [Card(symbol='A', suit='spade'),
+            #                                         Card(symbol='A', suit='heart')]
             self.game_state = "insurance"
             self.show_banker_card()
             self.show_players_card()
-            self.update_money(self.game.get_players()[0])
-            self.update_stake(self.game.get_players()[0])
+            self.update_money(self.now_player)
+            self.update_stake(self.now_player)
             if self.is_ask_insurance:
                 self.ask_insurance()
             else:
-                self.player_choice()
+                self.player_choice(self.now_player)
         else:
             self.game_state = "no money"
             self.show_game_end()
@@ -142,8 +146,11 @@ class Casino:
             self.show_banker_card()
         game_end = self.game.check_blackjack()
         game_end = self.is_player_end()
-        if not game_end:
-            self.player_choice()
+        if game_end:
+            self.game_end_process()
+        else:
+            self.player_choice(self.now_player)
+
 
     # End Process
     def game_end_process(self):
@@ -151,9 +158,12 @@ class Casino:
         # ToDo only care player 1 win or lose now
         game_end = self.is_player_end()
         if game_end:
-            self.update_money(self.game.get_players()[0])
-            self.update_stake(self.game.get_players()[0])
-        self.game.players.leave_table()
+            self.game_state = "end"
+            self.game_choice = 0
+            self.show_game_end()
+            self.update_money(self.now_player)
+            self.update_stake(self.now_player)
+        self.game.get_players().eliminate()
         self.game.give_money_all()
 
     # Ask Insurance
@@ -170,10 +180,39 @@ class Casino:
             result = self.show_question(x1 - 130, y1, question="Buy insurance?", options=["Yes", "No"])
             self.game_interface_dict[self.game_state] = result
         else:
-            self.player_choice()
+            self.player_choice(self.now_player)
 
     # Player Choice
-    def player_choice(self):
+    def player_choice(self, player):
+        hands = player.get_hands()
+        for num in range(len(hands)):
+            result = hands[num].get_result()
+            if result == "":
+                self.player_hand_choice(player, num)
+                break
+
+    # Set Player hand Hit
+    def set_player_hit(self, player):
+        hands = player.get_hands()
+        for hand in hands:
+            if hand.get_result() == "":
+                self.game.hit_process(hand)
+                break
+
+    # Set Player hand Stand
+    def set_player_stand(self, player):
+        hands = player.get_hands()
+        for hand in hands:
+            if hand.get_result() == "":
+                self.set_hand_stand(hand)
+                break
+
+    # Set Player Hand Result Stand
+    def set_hand_stand(self, hand):
+        hand.set_result("stand")
+
+    # Player Hand Choice
+    def player_hand_choice(self, player, hand_num):
         self.game_state = "choice"
         x1, y1, x2, y2 = self.players_area_xy[0]
         q_config = {"font": ("Arial", 14, "bold")}
@@ -186,16 +225,19 @@ class Casino:
         player_option = []
 
         # TODO options for player 1
-        plyer_one = self.game.get_players()[0]
-        plyer_one_hand = self.game.get_players()[0].hands[0]
+        # plyer_one = self.now_player
+        # plyer_one_hand = self.now_player.hands[0]
 
         self.game_choice = 0
 
-        options = self.game.get_player_option(plyer_one, plyer_one_hand)
+        # options = self.game.get_player_option(plyer_one, plyer_one_hand)
+        hand = player.get_hands()[hand_num]
+        options = self.game.get_player_option(player, hand)
         for option in options:
             player_option.append(player_option_dict[option])
 
-        result = self.show_question(x1 - 143, y1 - 15, question="Your Choice:", q_config=q_config,
+        result = self.show_question(x1 - 143, y1 - 15 + IMG_HAND_CHOICE_SPACE * hand_num, question="Your Choice:",
+                                    q_config=q_config,
                                     options=player_option, o_index=options)
         self.game_interface_dict[self.game_state] = result
 
@@ -257,16 +299,11 @@ class Casino:
 
     # Check Player State
     def is_player_end(self):
-
         game_result = False
         # TODO only check player 1 now
-        hands = self.game.get_players()[0].hands
+        hands = self.now_player.get_hands()
         if hands:
             game_result = all([(True if hand.result != "" else False) for hand in hands])
-        if game_result:
-            self.game_state = "end"
-            self.game_choice = 0
-            self.show_game_end()
         return game_result
 
     # Show Game End
@@ -274,17 +311,17 @@ class Casino:
 
         game_result = ""
         # TODO only check player 1 now
-        hands = self.game.get_players()[0].hands
+        hands = self.now_player.get_hands()
         for num in range(len(hands)):
             if num != 0:
                 game_result += ", "
-            if hands[num].result == "push":
+            if hands[num].get_result() == "push":
                 game_result += "PUSH"
-            elif hands[num].result == "blackjack":
+            elif hands[num].get_result() == "blackjack":
                 game_result += "BlackJack"
-            elif hands[num].result == "lose":
+            elif hands[num].get_result() == "lose":
                 game_result += "LOSE"
-            elif hands[num].result == "win":
+            elif hands[num].get_result() == "win":
                 game_result += "WIN"
         return game_result
 
@@ -370,7 +407,9 @@ class Casino:
             for card_num in range(len(cards)):
                 card = cards[card_num]
                 card_loc = 14 * self.img_suit_dict[card.suit] + self.img_symbol_dict[card.symbol]
-                card_img = self.show_card(x + 20 * card_num + CARD_HORIZONTAL_MODIFY, y + 40 * hand_num, card_loc, card.faced)
+                card_img = self.show_card(x + 20 * card_num + CARD_HORIZONTAL_MODIFY,
+                                          y + IMG_HAND_CARD_SPACE * hand_num, card_loc,
+                                          card.faced)
                 self.players_img[player_num][hand_num].append(card_img)
 
     def delete_imgs(self, imgs):
@@ -448,50 +487,59 @@ class Casino:
         print("Right key pressed")
 
     def enterKey(self, event):
+
         if self.game_state == "insurance":
             self.game.ask_insurance(self.is_insurance)
             # Destroy previous Area
             self.destroy_obj(self.game_interface_dict["insurance"]["area"])
             self.game_state = "blackjack"
             self.check_blackjack()
-        elif self.game_state == "choice":
-            game_choice_ = self.game_interface_dict[self.game_state]["options"][self.game_choice][1]
 
+        elif self.game_state == "choice":
+
+            game_choice_ = self.game_interface_dict[self.game_state]["options"][self.game_choice][1]
             if game_choice_ == "double":
                 # ToDo Only Player 1
-                self.game.double_down_process(self.game.get_players()[0])
+                self.game.double_down_process(self.now_player)
                 self.show_players_card()
                 self.destroy_obj(self.game_interface_dict["choice"]["area"])
                 if self.is_player_end():
                     self.game_state = "end"
+                    self.game_choice = 0
+                    self.show_game_end()
                 else:
                     self.game_state = "banker"
                     self.banker_time()
 
             elif game_choice_ == "split":
                 # ToDo Only Player 1 Hand 1
-                self.game.split_process(self.game.get_players()[0], self.game.get_players()[0].hands[0])
+                self.game.split_process(self.now_player, self.now_player.get_hands()[0])
                 self.show_players_card()
                 self.destroy_obj(self.game_interface_dict["choice"]["area"])
-                self.player_choice()
+                self.player_choice(self.now_player)
 
             elif game_choice_ == "hit":
-                # ToDo Only Player 1
-                self.game.hit_process(self.game.get_players()[0])
+                self.set_player_hit(self.now_player)
                 self.show_players_card()
                 self.destroy_obj(self.game_interface_dict["choice"]["area"])
-                print(self.is_player_end())
                 if self.is_player_end():
                     self.game_state = "end"
+                    self.game_choice = 0
+                    self.show_game_end()
                 else:
-                    self.player_choice()
+                    self.player_choice(self.now_player)
 
             elif game_choice_ == "stand":
                 self.destroy_obj(self.game_interface_dict["choice"]["area"])
-                self.game_state = "banker"
-                self.banker_time()
+                self.set_player_stand(self.now_player)
+                if self.is_player_end():
+                    self.game_state = "banker"
+                    self.banker_time()
+                else:
+                    self.player_choice(self.now_player)
 
         elif self.game_state == "end":
+
             game_choice_ = self.game_interface_dict[self.game_state]["options"][self.game_choice][1]
             if game_choice_ == "continue":
                 # Destroy previous Area
