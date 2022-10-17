@@ -107,6 +107,10 @@ class Blackjack:
             return True
         return False
 
+    def get_player_insurance(self, player):
+        return player.get_insurance()
+
+
     # Check Sum
     def get_hand_sum(self, cards_in_hand):
 
@@ -165,6 +169,13 @@ class Blackjack:
     def set_blackjack_ratio(self, blackjack_ratio):
         self.blackjack_ratio = blackjack_ratio
 
+    def set_player_insurance(self, player, insurance: bool):
+
+        player.set_insurance(insurance)
+
+    def reset_player_insurance(self, player):
+
+        player.set_insurance(False)
 
     def check_blackjack(self):
 
@@ -232,19 +243,19 @@ class Blackjack:
         # To banker
         self.deal(self.banker)
 
-    # Asl Insurance
+    # Ask Insurance
     def ask_insurance(self, choice):
 
+        # ToDo only for player 1
         # for num in range(self.player_num):
         self.ask_player_insurance(self.players.get_players_in()[0], choice)
 
     def ask_player_insurance(self, player, choice):
 
         player.set_insurance(False)
-        if player.get_money() >= floor(player.get_basic_stake() / 2):
-            if choice:
-                player.add_money(-floor(player.get_basic_stake() / 2))
-                player.set_insurance(True)
+        if choice and player.get_money() >= floor(player.get_basic_stake() / 2):
+            player.add_money(-floor(player.get_basic_stake() / 2))
+            player.set_insurance(True)
 
     # It's Player Round
     def choice(self):
@@ -359,7 +370,6 @@ class Blackjack:
         player.add_money(-player.get_basic_stake())
         player.add_total_stake(player.get_basic_stake())
         self.split(player.get_hands(), hand)
-
 
     # It's banker time
     def reveal_banker_card(self):

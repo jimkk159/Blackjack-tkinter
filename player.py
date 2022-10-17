@@ -28,6 +28,7 @@ class Hand:
     def set_charlie(self, charlie):
         self._5_card_charlie = charlie
 
+
 class Player:
 
     def __init__(self, id_, money=100, init_stake=5):
@@ -154,6 +155,9 @@ class Players:
             basic_stake = player.get_basic_stake()
             player.set_total_stake(basic_stake)
 
+    def set_player_insurance(self, player, insurance: bool):
+        player.set_insurance(insurance)
+
     # Create Player
     def create(self, player_num):
         in_game = []
@@ -219,7 +223,7 @@ class Players:
     def reset_insurance(self):
 
         for player in self.in_:
-            player.insurance = False
+            player.set_insurance(False)
 
     # Reset Cards in hand
     def reset_hands(self):

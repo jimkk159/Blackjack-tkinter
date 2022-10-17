@@ -58,7 +58,6 @@ class Casino:
         self.game_state = "start"
         self.game_choice = 0
 
-        self.is_insurance = None
         self.now_player = self.game.get_players_in()[0]
 
         self.banker_img = []
@@ -132,7 +131,7 @@ class Casino:
             self.update_money(self.now_player)
             self.update_stake(self.now_player)
             if self.is_ask_insurance:
-                self.ask_insurance()
+                self.insurance_process()
             else:
                 self.player_choice(self.now_player)
         else:
@@ -167,13 +166,12 @@ class Casino:
         self.game.give_money_all()
 
     # Ask Insurance
-    def ask_insurance(self):
+    def insurance_process(self):
 
         if self.game.get_judge_insurance():
             self.game_state = "insurance"
             self.game_choice = 0
-            self.is_insurance = True
-
+            self.game.set_player_insurance(self.now_player, True)
             # Create Area
             # for num in range(self.player_num):
             x1, y1, x2, y2 = self.players_area_xy[0]
@@ -299,6 +297,7 @@ class Casino:
 
     # Check Player State
     def is_player_end(self):
+
         game_result = False
         # TODO only check player 1 now
         hands = self.now_player.get_hands()
@@ -456,7 +455,7 @@ class Casino:
     # Keyboard
     def upKey(self, event):
         if self.game_state == "insurance":
-            self.is_insurance = True
+            self.game.set_player_insurance(self.now_player, True)
             self.game_choice = self.switch_choice(self.game_choice, "up",
                                                   self.game_interface_dict[self.game_state]["options"])
         elif self.game_state == "choice":
@@ -469,7 +468,7 @@ class Casino:
 
     def downKey(self, event):
         if self.game_state == "insurance":
-            self.is_insurance = False
+            self.game.set_player_insurance(self.now_player, False)
             self.game_choice = self.switch_choice(self.game_choice, "down",
                                                   self.game_interface_dict[self.game_state]["options"])
         elif self.game_state == "choice":
@@ -489,7 +488,7 @@ class Casino:
     def enterKey(self, event):
 
         if self.game_state == "insurance":
-            self.game.ask_insurance(self.is_insurance)
+            self.game.ask_insurance(self.now_player.get_player_insurance())
             # Destroy previous Area
             self.destroy_obj(self.game_interface_dict["insurance"]["area"])
             self.game_state = "blackjack"
