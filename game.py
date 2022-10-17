@@ -1,7 +1,6 @@
-import card
 from math import floor
 from player import Hand, Players
-from card import Card, Deck
+from card import Deck
 
 
 class Blackjack:
@@ -31,12 +30,6 @@ class Blackjack:
 
         # Leave game player
         self.leave_man = 0
-
-    def start(self):
-
-        if self.is_insurance:
-            self.ask_insurance()
-        self.check_blackjack()
 
     # GET
     def get_deck_num(self):
