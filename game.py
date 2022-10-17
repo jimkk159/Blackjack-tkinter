@@ -179,27 +179,37 @@ class Blackjack:
 
     def check_blackjack(self):
 
+        return all(map(self.check_player_blackjack, self.get_players_in()))
+
+    def check_player_blackjack(self, player):
+
+        hand = player.get_hands()[0]
+        banker_blackjack = self.get_is_banker_blackjack()
+        player_blackjack = self.get_is_player_blackjack(player)
+
+        if banker_blackjack and player_blackjack:
+            hand.set_result("push")
+            return True
+
+        if banker_blackjack:
+            hand.set_result("lose")
+            return True
+
+        if player_blackjack:
+            hand.set_result("blackjack")
+            return True
+        return False
+
+    def get_is_banker_blackjack(self):
         if self.get_is_blackjack(self.banker):
+            return True
+        return False
 
-            for player in self.players.in_:
-
-                if self.get_is_blackjack(player.hands[0].cards):
-                    player.hands[0].result = "push"
-                else:
-                    player.hands[0].result = "lose"
-
-            return True  # Mean Game End
-
-        for player in self.players.in_:
-
-            if self.get_is_blackjack(player.hands[0].cards):
-                player.hands[0].result = "blackjack"
-
-        # TODO only thing about the player 1 game end situation
-        if self.get_is_blackjack(self.players.in_[0].hands[0].cards):
-            return True  # Mean Game End
-        else:
-            return False  # Mean Game Continue
+    def get_is_player_blackjack(self, player):
+        hand = player.get_hands()[0]
+        if self.get_is_blackjack(hand.get_cards()):
+            return True
+        return False
 
     # Game Setting
     def reset(self):
