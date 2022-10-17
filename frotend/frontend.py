@@ -29,7 +29,7 @@ class Frontend:
 
         # Music
         pygame.mixer.music.load("../music/Chris Bell & 100 Blues - Cold-Hearted Woman.mp3")
-        pygame.mixer.music.set_volume(0.1)
+        pygame.mixer.music.set_volume(0.01)
         pygame.mixer.music.play()
         game = Blackjack()
 

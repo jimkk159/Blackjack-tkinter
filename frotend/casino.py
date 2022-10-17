@@ -488,7 +488,7 @@ class Casino:
     def enterKey(self, event):
 
         if self.game_state == "insurance":
-            self.game.ask_insurance(self.now_player.get_player_insurance())
+            self.game.ask_insurance(self.now_player.get_insurance())
             # Destroy previous Area
             self.destroy_obj(self.game_interface_dict["insurance"]["area"])
             self.game_state = "blackjack"
